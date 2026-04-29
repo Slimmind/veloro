@@ -9,6 +9,12 @@ export default defineConfig({
 		VitePWA({
 			registerType: 'autoUpdate',
 			injectRegister: false,
+			// `generateSW` сейчас падает при закрытии бандлера:
+			// "Unfinished hook action(s) on exit: (terser) renderChunk".
+			// Переходим на `injectManifest` и отключаем minify именно для SW сборки.
+			strategies: 'injectManifest',
+			srcDir: 'src',
+			filename: 'sw.ts',
 
 			pwaAssets: {
 				disabled: false,
@@ -22,10 +28,8 @@ export default defineConfig({
 				theme_color: '#2E8B56',
 			},
 
-			workbox: {
-				globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-				cleanupOutdatedCaches: true,
-				clientsClaim: true,
+			injectManifest: {
+				minify: false,
 			},
 
 			devOptions: {

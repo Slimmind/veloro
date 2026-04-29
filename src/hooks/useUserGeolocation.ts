@@ -1,14 +1,14 @@
-// src/components/main-map/useUserGeolocation.ts
+// src/hooks/useUserGeolocation.ts
 
 import { useCallback, useState } from 'react';
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple, Map as LeafletMap } from 'leaflet';
 
 export interface UseGeolocationReturn {
 	position: LatLngTuple | null;
 	accuracy: number | null;
 	loading: boolean;
 	error: string | null;
-	findMe: (map?: any, zoom?: number) => Promise<void>; // map — инстанс Leaflet Map
+	findMe: (map?: LeafletMap, zoom?: number) => Promise<void>; // map — инстанс Leaflet Map
 }
 
 export const useUserGeolocation = (): UseGeolocationReturn => {
@@ -17,7 +17,7 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const findMe = useCallback(async (map?: any, zoom = 14) => {
+	const findMe = useCallback(async (map?: LeafletMap, zoom = 14) => {
 		if (!navigator.geolocation) {
 			setError('Геолокация не поддерживается браузером');
 			return;
@@ -45,10 +45,11 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 			if (map) {
 				map.flyTo(userPosition, zoom, { animate: true, duration: 1.2 });
 			}
-		} catch (err: any) {
+		} catch (err: unknown) {
 			console.warn('Geolocation error:', err);
+			const geoErr = err as Partial<GeolocationPositionError> | undefined;
 			setError(
-				err.code === 1
+				geoErr?.code === 1
 					? 'Доступ к геолокации запрещён'
 					: 'Не удалось определить местоположение',
 			);
