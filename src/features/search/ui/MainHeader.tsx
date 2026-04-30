@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
 import { Button } from '../../../shared/ui/button';
+import { BikeLegend } from '../../map/ui/BikeLegend';
 import './main-header.styles.css';
+import { PinIcon } from '../../../icons/pin-icon';
 
 interface MainHeaderProps {
 	onSearchSelect: (result: { name: string; position: LatLngTuple }) => void;
@@ -49,22 +51,32 @@ export const MainHeader = ({
 		onSearchSelect(result);
 	};
 
+	const clearInput = () => {
+		setSearchQuery('');
+	};
+
 	return (
 		<header className='main-header'>
+			<BikeLegend />
 			<form onSubmit={handleSubmit} className='search-form' ref={dropdownRef}>
-				<input
-					name='path'
-					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
-					onFocus={() => searchResults.length > 0 && setShowResults(true)}
-					placeholder='Поиск места...'
-					className='search-input'
-					autoComplete='off'
-				/>
+				<div className='input-wrap'>
+					<input
+						name='path'
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						onFocus={() => searchResults.length > 0 && setShowResults(true)}
+						placeholder='Поиск...'
+						className='search-input'
+						autoComplete='off'
+					/>
+					{searchQuery && (
+						<Button mod='circle cross' onClick={clearInput}></Button>
+					)}
+				</div>
 
 				<Button
 					type='submit'
-					mod='circle search'
+					mod='circle icon search'
 					disabled={searchLoading}
 					aria-label='Найти'
 				>
@@ -82,18 +94,21 @@ export const MainHeader = ({
 								className='search-result-item'
 								onClick={() => handleSelect(result)}
 							>
-								<span className='result-icon'>📍</span>
+								<span className='result-icon'>
+									<PinIcon />
+								</span>
 								<span className='result-name'>{result.name}</span>
 							</button>
 						))}
 
-						{searchResults.length === 0 && !searchError && searchQuery.trim() && (
-							<div className='search-no-results'>Ничего не найдено</div>
-						)}
+						{searchResults.length === 0 &&
+							!searchError &&
+							searchQuery.trim() && (
+								<div className='search-no-results'>Ничего не найдено</div>
+							)}
 					</div>
 				)}
 			</form>
 		</header>
 	);
 };
-

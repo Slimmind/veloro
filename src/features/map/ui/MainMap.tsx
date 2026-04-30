@@ -14,7 +14,6 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import shadow from 'leaflet/dist/images/marker-shadow.png';
 
-import { BikeLegend } from './BikeLegend';
 import { BikePathsOverlay } from './BikePathsOverlay';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
@@ -37,7 +36,11 @@ interface MainMapProps {
 	selectedResult: SearchResult | null;
 }
 
-const SearchViewUpdater = ({ position }: { position: LatLngTuple | undefined }) => {
+const SearchViewUpdater = ({
+	position,
+}: {
+	position: LatLngTuple | undefined;
+}) => {
 	const map = useMap();
 
 	useEffect(() => {
@@ -53,8 +56,6 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 
 	return (
 		<div className='main-map'>
-			<BikeLegend />
-
 			<MapContainer
 				center={selectedResult?.position || ([53.9, 27.56] as LatLngTuple)}
 				zoom={selectedResult ? 15 : 10}
@@ -94,4 +95,3 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 		</div>
 	);
 };
-

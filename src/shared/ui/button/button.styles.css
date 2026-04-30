@@ -1,8 +1,9 @@
 button,
 .btn {
   position: relative;
+  flex-shrink: 0;
   padding: 8px;
-  background-color: var(--color-white-transparent);
+  background-color: var(--color-violet-transparent);
   backdrop-filter: blur(var(--blur));
   border: 0;
   border-radius: 8px;
@@ -18,13 +19,18 @@ button,
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 0;
+  box-shadow: 0 0 0 4px var(--color-violet);
 }
 
 .btn--circle {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+}
+
+.btn--icon {
+  padding: 0;
 }
 
 .btn--menu {
@@ -86,3 +92,22 @@ button:focus-visible {
   cursor: not-allowed;
 }
 
+.btn--cross::before,
+.btn--cross::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 4px;
+  background-color: var(--color-white);
+  border-radius: 2px;
+}
+
+.btn--cross::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.btn--cross::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
