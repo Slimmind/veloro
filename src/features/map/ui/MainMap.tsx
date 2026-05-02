@@ -3,7 +3,6 @@ import {
 	MapContainer,
 	Marker,
 	Popup,
-	TileLayer,
 	ZoomControl,
 	useMap,
 } from 'react-leaflet';
@@ -18,7 +17,9 @@ import { BikePathsOverlay } from './BikePathsOverlay';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
 import { UserLocation } from './UserLocation';
+import { VectorTileLayer } from './VectorTileLayer';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
+import { MAP_STYLES } from '../model/map-styles';
 import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
 
 import type { SearchResult } from '../../../entities/search';
@@ -60,7 +61,7 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 		<div className='main-map'>
 			<MapContainer
 				center={selectedResult?.position || ([53.9, 27.56] as LatLngTuple)}
-				zoom={selectedResult ? 15 : 10}
+				zoom={selectedResult ? 15 : 13}
 				style={{ height: '100%', width: '100%' }}
 				zoomControl={false}
 				scrollWheelZoom={true}
@@ -71,12 +72,7 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 				<ZoomControl position='bottomright' />
 				<FindMeButton findMe={findMe} loading={loading} error={error} />
 
-				<TileLayer
-					url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-					subdomains='abc'
-					attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-					maxZoom={19}
-				/>
+				<VectorTileLayer styleUrl={MAP_STYLES.bright.url} />
 
 				{mapBounds && <BikePathsOverlay bounds={mapBounds} minZoom={12} />}
 

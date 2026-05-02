@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import L from 'leaflet';
 import type { LatLngBounds, LeafletMouseEvent } from 'leaflet';
-import { Polyline, useMap } from 'react-leaflet';
+import { Polyline, useMap, useMapEvents } from 'react-leaflet';
 import { getLeafletPathOptions } from '../model/bike-path-styles';
 import { useBikePaths } from '../model/useBikePaths';
 
@@ -10,11 +11,16 @@ interface BikePathsOverlayProps {
 }
 
 export const BikePathsOverlay = ({ bounds, minZoom = 12 }: BikePathsOverlayProps) => {
-	const { paths, loading } = useBikePaths(bounds);
 	const map = useMap();
+	const [zoom, setZoom] = useState(() => map.getZoom());
 
-	if (map.getZoom() < minZoom) return null;
-	if (loading && paths.length === 0) return null;
+	useMapEvents({
+		zoomend: () => setZoom(map.getZoom()),
+	});
+
+	const { paths } = useBikePaths(bounds, zoom >= minZoom);
+
+	if (zoom < minZoom) return null;
 
 	return (
 		<>
@@ -34,4 +40,3 @@ export const BikePathsOverlay = ({ bounds, minZoom = 12 }: BikePathsOverlayProps
 		</>
 	);
 };
-

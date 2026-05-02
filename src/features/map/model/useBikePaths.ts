@@ -1,23 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 import type { LatLngBounds } from 'leaflet';
 import { fetchBikePathsOverpass } from '../../../shared/api/overpass';
-import type { BikePath } from '../../../entities/bikePath';
+import { bikePathsStore } from './bikePathsStore';
 import type { UseBikePathsReturn } from './types';
 import { debounce } from '../../../shared/lib/debounce';
 
-export const useBikePaths = (bounds: LatLngBounds | null): UseBikePathsReturn => {
-	const [paths, setPaths] = useState<BikePath[]>([]);
-	const [loading, setLoading] = useState(false);
+export const useBikePaths = (bounds: LatLngBounds | null, enabled: boolean): UseBikePathsReturn => {
+	const paths = useSyncExternalStore(
+		bikePathsStore.subscribe,
+		bikePathsStore.getSnapshot,
+	);
 
 	const fetchPaths = useCallback(async (bbox: LatLngBounds) => {
-		setLoading(true);
 		try {
-			const parsed = await fetchBikePathsOverpass(bbox);
-			setPaths(parsed);
+			const fetched = await fetchBikePathsOverpass(bbox);
+			bikePathsStore.addPaths(fetched);
 		} catch (err) {
 			console.warn('Failed to fetch bike paths:', err);
-		} finally {
-			setLoading(false);
 		}
 	}, []);
 
@@ -27,9 +26,9 @@ export const useBikePaths = (bounds: LatLngBounds | null): UseBikePathsReturn =>
 	);
 
 	useEffect(() => {
-		if (!bounds) return;
+		if (!bounds || !enabled) return;
 		fetchPathsDebounced(bounds);
-	}, [bounds, fetchPathsDebounced]);
+	}, [bounds, enabled, fetchPathsDebounced]);
 
-	return { paths, loading };
+	return { paths };
 };
