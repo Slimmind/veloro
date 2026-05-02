@@ -1,17 +1,13 @@
-import { useEffect } from 'react';
-import { Circle, Marker, Popup, useMap } from 'react-leaflet';
-import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
+import { Circle, Marker, Popup } from 'react-leaflet';
+import type { LatLngTuple } from 'leaflet';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
 
-export const UserLocation = () => {
-	const map = useMap();
-	const { position, accuracy, findMe } = useUserGeolocation();
+interface UserLocationProps {
+	position: LatLngTuple | null;
+	accuracy: number | null;
+}
 
-	useEffect(() => {
-		findMe(map);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
-
+export const UserLocation = ({ position, accuracy }: UserLocationProps) => {
 	if (!position) return null;
 
 	return (
@@ -41,4 +37,3 @@ export const UserLocation = () => {
 		</>
 	);
 };
-

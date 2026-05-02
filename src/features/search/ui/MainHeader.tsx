@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
 import { Button } from '../../../shared/ui/button';
-import { BikeLegend } from '../../map/ui/BikeLegend';
+import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import './main-header.styles.css';
 import { PinIcon } from '../../../icons/pin-icon';
 

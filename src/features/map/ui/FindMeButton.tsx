@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { useMap } from 'react-leaflet';
+import type { Map as LeafletMap } from 'leaflet';
 import { DirectionIcon } from '../../../icons/direction-icon';
-import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
 import { Button } from '../../../shared/ui/button';
 
-export const FindMeButton = () => {
+interface FindMeButtonProps {
+	findMe: (map?: LeafletMap, zoom?: number) => Promise<string | null>;
+	loading: boolean;
+	error: string | null;
+}
+
+export const FindMeButton = ({ findMe, loading, error }: FindMeButtonProps) => {
 	const map = useMap();
-	const { findMe, loading, error } = useUserGeolocation();
 	const [showError, setShowError] = useState(false);
 
 	const handleClick = async () => {
 		setShowError(false);
-		await findMe(map, 14);
-		if (error) {
+		const err = await findMe(map, 14);
+		if (err) {
 			setShowError(true);
 			setTimeout(() => setShowError(false), 3000);
 		}

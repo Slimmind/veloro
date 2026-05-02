@@ -1,41 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
 import type { LatLngBounds, LeafletMouseEvent } from 'leaflet';
 import { Polyline, useMap } from 'react-leaflet';
 import { getLeafletPathOptions } from '../model/bike-path-styles';
-import { fetchBikePathsOverpass } from '../../../shared/api/overpass';
-import type { BikePath } from '../../../entities/bikePath';
-import type { UseBikePathsReturn } from '../model/types';
-import { debounce } from '../../../shared/lib/debounce';
-
-const useBikePaths = (bounds: LatLngBounds | null): UseBikePathsReturn => {
-	const [paths, setPaths] = useState<BikePath[]>([]);
-	const [loading, setLoading] = useState(false);
-
-	const fetchPaths = useCallback(async (bbox: LatLngBounds) => {
-		setLoading(true);
-		try {
-			const parsed = await fetchBikePathsOverpass(bbox);
-			setPaths(parsed);
-		} catch (err) {
-			console.warn('Failed to fetch bike paths:', err);
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	const fetchPathsDebounced = useMemo(
-		() => debounce(fetchPaths, 350),
-		[fetchPaths],
-	);
-
-	useEffect(() => {
-		if (!bounds) return;
-		fetchPathsDebounced(bounds);
-	}, [bounds, fetchPathsDebounced]);
-
-	return { paths, loading };
-};
+import { useBikePaths } from '../model/useBikePaths';
 
 interface BikePathsOverlayProps {
 	bounds: LatLngBounds | null;

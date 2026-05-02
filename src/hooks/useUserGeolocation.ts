@@ -8,7 +8,7 @@ export interface UseGeolocationReturn {
 	accuracy: number | null;
 	loading: boolean;
 	error: string | null;
-	findMe: (map?: LeafletMap, zoom?: number) => Promise<void>; // map — инстанс Leaflet Map
+	findMe: (map?: LeafletMap, zoom?: number) => Promise<string | null>;
 }
 
 export const useUserGeolocation = (): UseGeolocationReturn => {
@@ -17,10 +17,11 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const findMe = useCallback(async (map?: LeafletMap, zoom = 14) => {
+	const findMe = useCallback(async (map?: LeafletMap, zoom = 14): Promise<string | null> => {
 		if (!navigator.geolocation) {
-			setError('Геолокация не поддерживается браузером');
-			return;
+			const msg = 'Геолокация не поддерживается браузером';
+			setError(msg);
+			return msg;
 		}
 
 		setLoading(true);
@@ -45,14 +46,15 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 			if (map) {
 				map.flyTo(userPosition, zoom, { animate: true, duration: 1.2 });
 			}
+			return null;
 		} catch (err: unknown) {
 			console.warn('Geolocation error:', err);
 			const geoErr = err as Partial<GeolocationPositionError> | undefined;
-			setError(
-				geoErr?.code === 1
-					? 'Доступ к геолокации запрещён'
-					: 'Не удалось определить местоположение',
-			);
+			const msg = geoErr?.code === 1
+				? 'Доступ к геолокации запрещён'
+				: 'Не удалось определить местоположение';
+			setError(msg);
+			return msg;
 		} finally {
 			setLoading(false);
 		}

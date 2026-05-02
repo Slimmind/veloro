@@ -8,17 +8,15 @@ type CacheEntry<T> = {
 };
 
 const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
+const RATE_LIMIT_TTL_MS = 30 * 1000; // 30s cooldown after 429
 const cache = new Map<string, CacheEntry<BikePath[]>>();
 const inflight = new Map<string, Promise<BikePath[]>>();
 
-const toCacheKey = (bbox: LatLngBounds) => {
-	// Normalize to reduce cache fragmentation when user pans slightly.
-	const parts = bbox
-		.toBBoxString()
-		.split(',')
-		.map((s) => Number.parseFloat(s).toFixed(4));
-	return parts.join(',');
-};
+// Overpass expects (S,W,N,E); Leaflet's toBBoxString() returns W,S,E,N — build it manually.
+const toOverpassBbox = (bbox: LatLngBounds) =>
+	`${bbox.getSouth().toFixed(4)},${bbox.getWest().toFixed(4)},${bbox.getNorth().toFixed(4)},${bbox.getEast().toFixed(4)}`;
+
+const toCacheKey = (bbox: LatLngBounds) => toOverpassBbox(bbox);
 
 interface OverpassElementWay {
 	type: 'way';
@@ -52,12 +50,13 @@ export const fetchBikePathsOverpass = async (
 	const pending = inflight.get(key);
 	if (pending) return pending;
 
+	const overpassBbox = toOverpassBbox(bbox);
 	const query = `
     [out:json][timeout:25];
     (
-      way["highway"="cycleway"](${bbox.toBBoxString()});
-      way["cycleway"~"lane|track|opposite_lane"](${bbox.toBBoxString()});
-      way["route"="bicycle"](${bbox.toBBoxString()});
+      way["highway"="cycleway"](${overpassBbox});
+      way["cycleway"~"lane|track|opposite_lane"](${overpassBbox});
+      way["route"="bicycle"](${overpassBbox});
     );
     out geom;
   `;
@@ -68,6 +67,15 @@ export const fetchBikePathsOverpass = async (
 			body: `data=${encodeURIComponent(query)}`,
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 		});
+
+		if (response.status === 429) {
+			cache.set(key, { value: [], expiresAt: now + RATE_LIMIT_TTL_MS });
+			throw new Error('Overpass rate limit (429)');
+		}
+
+		if (!response.ok) {
+			throw new Error(`Overpass error: ${response.status}`);
+		}
 
 		const data: unknown = await response.json();
 		const elements =

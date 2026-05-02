@@ -19,6 +19,7 @@ import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
 import { UserLocation } from './UserLocation';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
+import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
 
 import type { SearchResult } from '../../../entities/search';
 
@@ -53,6 +54,7 @@ const SearchViewUpdater = ({
 
 export const MainMap = ({ selectedResult }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
+	const { position, accuracy, findMe, loading, error } = useUserGeolocation();
 
 	return (
 		<div className='main-map'>
@@ -67,19 +69,19 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 				dragging={true}
 			>
 				<ZoomControl position='bottomright' />
-				<FindMeButton />
+				<FindMeButton findMe={findMe} loading={loading} error={error} />
 
 				<TileLayer
-					url='https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'
-					attribution='&copy; CyclOSM | &copy; OpenStreetMap'
-					maxZoom={20}
-					minZoom={8}
+					url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+					subdomains='abc'
+					attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+					maxZoom={19}
 				/>
 
 				{mapBounds && <BikePathsOverlay bounds={mapBounds} minZoom={12} />}
 
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
-				<UserLocation />
+				<UserLocation position={position} accuracy={accuracy} />
 
 				<SearchViewUpdater position={selectedResult?.position} />
 				{selectedResult && (
