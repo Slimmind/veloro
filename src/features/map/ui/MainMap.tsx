@@ -8,12 +8,13 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import type { LatLngBounds, LatLngTuple } from 'leaflet';
+import type { Map as MLMap } from 'maplibre-gl';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import shadow from 'leaflet/dist/images/marker-shadow.png';
 
-import { BikePathsOverlay } from './BikePathsOverlay';
+import { BikePathsMlLayer } from './BikePathsMlLayer';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
 import { UserLocation } from './UserLocation';
@@ -55,6 +56,7 @@ const SearchViewUpdater = ({
 
 export const MainMap = ({ selectedResult }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
+	const [mlMap, setMlMap] = useState<MLMap | null>(null);
 	const { position, accuracy, findMe, loading, error } = useUserGeolocation();
 
 	return (
@@ -72,9 +74,9 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 				<ZoomControl position='bottomright' />
 				<FindMeButton findMe={findMe} loading={loading} error={error} />
 
-				<VectorTileLayer styleUrl={MAP_STYLES.bright.url} />
+				<VectorTileLayer styleUrl={MAP_STYLES.bright.url} onReady={setMlMap} />
 
-				{mapBounds && <BikePathsOverlay bounds={mapBounds} minZoom={12} />}
+				{mlMap && <BikePathsMlLayer mlMap={mlMap} bounds={mapBounds} minZoom={12} />}
 
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} />

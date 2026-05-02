@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { BIKE_PATH_STYLES } from '../../config/bike-path-styles';
 import { Button } from '../button';
-import './bike-legend.styles.css';
 import { QuestionIcon } from '../../../icons/question-icon';
+import './bike-legend.styles.css';
 
 export const BikeLegend = () => {
 	const [hidden, setHidden] = useState<boolean>(false);

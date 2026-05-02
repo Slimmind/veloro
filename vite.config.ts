@@ -25,7 +25,7 @@ export default defineConfig({
 				name: 'VeloRo',
 				short_name: 'veloro',
 				description: 'convinient cycling',
-				theme_color: '#2E8B56',
+				theme_color: '#535bf2',
 			},
 
 			injectManifest: {
