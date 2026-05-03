@@ -1,0 +1,14 @@
+.main-menu {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  background: var(--color-white-transparent);
+  backdrop-filter: blur(var(--blur));
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  z-index: 1000;
+}
+
+.main-menu.hidden {
+  display: none;
+}

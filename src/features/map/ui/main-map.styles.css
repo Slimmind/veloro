@@ -184,16 +184,23 @@
 
 /* 🗺️ Переключатель стилей карты */
 .map-style-switcher {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
-  display: flex;
-  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid var(--color-violet-transparent);
 }
 
+.map-style-switcher__title {
+  margin-bottom: 8px;
+  color: var(--color-black);
+}
+
+.map-style-switcher__container {
+  display: flex;
+  gap: 10px;
+}
+
+
 .btn--style {
-  padding: 6px 12px;
+  flex-grow: 1;
   font-size: 0.75rem;
   color: var(--color-white);
 }

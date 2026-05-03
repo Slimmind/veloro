@@ -18,11 +18,10 @@ import shadow from 'leaflet/dist/images/marker-shadow.png';
 import { BikePathsMlLayer } from './BikePathsMlLayer';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
-import { MapStyleSwitcher } from './MapStyleSwitcher';
 import { UserLocation } from './UserLocation';
 import { VectorTileLayer } from './VectorTileLayer';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
-import { MAP_STYLES, DEFAULT_MAP_STYLE } from '../model/map-styles';
+import { MAP_STYLES } from '../model/map-styles';
 import type { MapStyleKey } from '../model/map-styles';
 import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
 
@@ -40,6 +39,7 @@ L.Icon.Default.mergeOptions({
 
 interface MainMapProps {
 	selectedResult: SearchResult | null;
+	activeStyle: MapStyleKey;
 }
 
 const SearchViewUpdater = ({
@@ -57,18 +57,16 @@ const SearchViewUpdater = ({
 	return null;
 };
 
-export const MainMap = ({ selectedResult }: MainMapProps) => {
+export const MainMap = ({ selectedResult, activeStyle }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
-	const [activeStyle, setActiveStyle] = useState<MapStyleKey>(DEFAULT_MAP_STYLE);
 	const { position, accuracy, findMe, loading, error } = useUserGeolocation();
 
 	const currentStyle = MAP_STYLES[activeStyle];
 
-	const handleStyleChange = (style: MapStyleKey) => {
+	useEffect(() => {
 		setMlMap(null);
-		setActiveStyle(style);
-	};
+	}, [activeStyle]);
 
 	return (
 		<div className='main-map'>
@@ -95,7 +93,6 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} />
-				<MapStyleSwitcher activeStyle={activeStyle} onChange={handleStyleChange} />
 
 				<SearchViewUpdater position={selectedResult?.position} />
 				{selectedResult && (

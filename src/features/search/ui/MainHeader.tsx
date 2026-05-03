@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
 import { Button } from '../../../shared/ui/button';
 import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
+import { MainMenu } from './MainMenu';
 import './main-header.styles.css';
 import { PinIcon } from '../../../icons/pin-icon';
+import type { MapStyleKey } from '../../map/model/map-styles';
 
 interface MainHeaderProps {
 	onSearchSelect: (result: { name: string; position: LatLngTuple }) => void;
@@ -11,6 +13,8 @@ interface MainHeaderProps {
 	searchLoading?: boolean;
 	searchResults?: Array<{ name: string; position: LatLngTuple }>;
 	searchError?: string | null;
+	activeStyle: MapStyleKey;
+	onStyleChange: (style: MapStyleKey) => void;
 }
 
 export const MainHeader = ({
@@ -19,10 +23,24 @@ export const MainHeader = ({
 	searchLoading = false,
 	searchResults = [],
 	searchError = null,
+	activeStyle,
+	onStyleChange,
 }: MainHeaderProps) => {
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [showResults, setShowResults] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(false);
+	const [legendVisible, setLegendVisible] = useState(true);
 	const dropdownRef = useRef<HTMLFormElement>(null);
+
+	useEffect(() => {
+		const timeoutId = window.setTimeout(() => setLegendVisible(false), 10000);
+		return () => window.clearTimeout(timeoutId);
+	}, []);
+
+	const handleMenuToggle = () => {
+		if (!menuOpen) setLegendVisible(false);
+		setMenuOpen((prev) => !prev);
+	};
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -57,7 +75,12 @@ export const MainHeader = ({
 
 	return (
 		<header className='main-header'>
-			<BikeLegend />
+			<MainMenu open={menuOpen} onToggle={handleMenuToggle} activeStyle={activeStyle} onStyleChange={onStyleChange} />
+			{legendVisible && !menuOpen && (
+				<div className='bike-legend-panel'>
+					<BikeLegend />
+				</div>
+			)}
 			<form onSubmit={handleSubmit} className='search-form' ref={dropdownRef}>
 				<div className='input-wrap'>
 					<input

@@ -32,12 +32,6 @@
   padding: 0;
 }
 
-.btn--menu {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-}
-
 .btn--menu::after {
   content: "";
   position: absolute;

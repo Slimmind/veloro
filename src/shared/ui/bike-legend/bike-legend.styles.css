@@ -1,19 +1,17 @@
 .bike-legend {
-  position: absolute;
-	top: 60px;
-	left: 10px;
-	background: var(--color-white-transparent);
-  backdrop-filter: blur(var(--blur));
-	padding: 10px 14px;
-	border-radius: 1rem;
-	font-size: 12;
-	box-shadow: var(--shadow);
-  color: black;
-	z-index: 1000;
+  color: var(--color-black);
+  padding: 10px;
 }
 
-.bike-legend.hidden {
-  display: none;
+.bike-legend-panel {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  background: var(--color-white-transparent);
+  backdrop-filter: blur(var(--blur));
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  z-index: 1000;
 }
 
 .bike-legend-title {
