@@ -1,4 +1,3 @@
-button,
 .btn {
   position: relative;
   flex-shrink: 0;
@@ -17,8 +16,8 @@ button,
   z-index: 1;
 }
 
-button:focus,
-button:focus-visible {
+.btn:focus,
+.btn:focus-visible {
   outline: 0;
   box-shadow: 0 0 0 4px var(--color-violet);
 }

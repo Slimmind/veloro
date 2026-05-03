@@ -181,3 +181,24 @@
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
 }
+
+/* 🗺️ Переключатель стилей карты */
+.map-style-switcher {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 6px;
+}
+
+.btn--style {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  color: var(--color-white);
+}
+
+.btn--style.active {
+  background-color: var(--color-violet);
+  color: var(--color-white);
+}

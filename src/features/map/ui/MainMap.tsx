@@ -3,6 +3,7 @@ import {
 	MapContainer,
 	Marker,
 	Popup,
+	TileLayer,
 	ZoomControl,
 	useMap,
 } from 'react-leaflet';
@@ -17,10 +18,12 @@ import shadow from 'leaflet/dist/images/marker-shadow.png';
 import { BikePathsMlLayer } from './BikePathsMlLayer';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
+import { MapStyleSwitcher } from './MapStyleSwitcher';
 import { UserLocation } from './UserLocation';
 import { VectorTileLayer } from './VectorTileLayer';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
-import { MAP_STYLES } from '../model/map-styles';
+import { MAP_STYLES, DEFAULT_MAP_STYLE } from '../model/map-styles';
+import type { MapStyleKey } from '../model/map-styles';
 import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
 
 import type { SearchResult } from '../../../entities/search';
@@ -57,7 +60,15 @@ const SearchViewUpdater = ({
 export const MainMap = ({ selectedResult }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
+	const [activeStyle, setActiveStyle] = useState<MapStyleKey>(DEFAULT_MAP_STYLE);
 	const { position, accuracy, findMe, loading, error } = useUserGeolocation();
+
+	const currentStyle = MAP_STYLES[activeStyle];
+
+	const handleStyleChange = (style: MapStyleKey) => {
+		setMlMap(null);
+		setActiveStyle(style);
+	};
 
 	return (
 		<div className='main-map'>
@@ -74,19 +85,24 @@ export const MainMap = ({ selectedResult }: MainMapProps) => {
 				<ZoomControl position='bottomright' />
 				<FindMeButton findMe={findMe} loading={loading} error={error} />
 
-				<VectorTileLayer styleUrl={MAP_STYLES.bright.url} onReady={setMlMap} />
+				{currentStyle.type === 'vector' ? (
+					<VectorTileLayer styleUrl={currentStyle.url} onReady={setMlMap} />
+				) : (
+					<TileLayer url={currentStyle.url} />
+				)}
 
 				{mlMap && <BikePathsMlLayer mlMap={mlMap} bounds={mapBounds} minZoom={12} />}
 
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} />
+				<MapStyleSwitcher activeStyle={activeStyle} onChange={handleStyleChange} />
 
 				<SearchViewUpdater position={selectedResult?.position} />
 				{selectedResult && (
 					<Marker position={selectedResult.position} icon={BIKE_MARKER_ICON}>
 						<Popup>
-							<strong>🔍 Найдено:</strong>
-							<br />
+							{/* <strong>🔍 Найдено:</strong> */}
+							{/* <br /> */}
 							{selectedResult.name}
 						</Popup>
 					</Marker>

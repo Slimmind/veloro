@@ -33,8 +33,7 @@ export const VectorTileLayer = ({ styleUrl, onReady }: VectorTileLayerProps) => 
 			map.removeLayer(layer);
 			layerRef.current = null;
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [map]);
+	}, [map, styleUrl]);
 
 	return null;
 };

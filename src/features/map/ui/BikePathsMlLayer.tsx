@@ -87,9 +87,13 @@ export const BikePathsMlLayer = ({ mlMap, bounds, minZoom = 12 }: BikePathsMlLay
 	useEffect(() => {
 		setupLayers(mlMap);
 		return () => {
-			if (mlMap.getLayer('bike-paths-solid')) mlMap.removeLayer('bike-paths-solid');
-			if (mlMap.getLayer('bike-paths-dashed')) mlMap.removeLayer('bike-paths-dashed');
-			if (mlMap.getSource(SOURCE_ID)) mlMap.removeSource(SOURCE_ID);
+			try {
+				if (mlMap.getLayer('bike-paths-solid')) mlMap.removeLayer('bike-paths-solid');
+				if (mlMap.getLayer('bike-paths-dashed')) mlMap.removeLayer('bike-paths-dashed');
+				if (mlMap.getSource(SOURCE_ID)) mlMap.removeSource(SOURCE_ID);
+			} catch {
+				// mlMap was already destroyed by VectorTileLayer cleanup
+			}
 		};
 	}, [mlMap]);
 
