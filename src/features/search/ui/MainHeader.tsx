@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
+import type { MapStyleKey } from '../../map/model/map-styles';
+import type { SearchResult } from '../../../entities/search';
 import { Button } from '../../../shared/ui/button';
 import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MainMenu } from './MainMenu';
-import './main-header.styles.css';
 import { PinIcon } from '../../../icons/pin-icon';
-import type { MapStyleKey } from '../../map/model/map-styles';
+import { PathIcon } from '../../../icons/path-icon';
+import './main-header.styles.css';
 
 interface MainHeaderProps {
-	onSearchSelect: (result: { name: string; position: LatLngTuple }) => void;
+	onSearchSelect: (result: SearchResult) => void;
 	onSearch: (query: string) => Promise<void>;
+	onDirectionClick: (result: SearchResult) => void;
 	searchLoading?: boolean;
-	searchResults?: Array<{ name: string; position: LatLngTuple }>;
+	searchResults?: SearchResult[];
 	searchError?: string | null;
 	activeStyle: MapStyleKey;
 	onStyleChange: (style: MapStyleKey) => void;
@@ -20,6 +23,7 @@ interface MainHeaderProps {
 export const MainHeader = ({
 	onSearchSelect,
 	onSearch,
+	onDirectionClick,
 	searchLoading = false,
 	searchResults = [],
 	searchError = null,
@@ -109,20 +113,30 @@ export const MainHeader = ({
 				{showResults && (searchResults.length > 0 || searchError) && (
 					<div className='search-results-dropdown'>
 						{searchError && <div className='search-error'>{searchError}</div>}
-
-						{searchResults.map((result, index) => (
-							<button
-								key={index}
-								type='button'
-								className='search-result-item'
-								onClick={() => handleSelect(result)}
-							>
-								<span className='result-icon'>
-									<PinIcon />
-								</span>
-								<span className='result-name'>{result.name}</span>
-							</button>
-						))}
+						<ul>
+							{searchResults.map((result, index) => (
+								<li key={index} className='search-result-item-wrapper'>
+									<button
+										className='search-result-item'
+										type='button'
+										onClick={() => handleSelect(result)}
+									>
+										<span className='result-icon'>
+											<PinIcon />
+										</span>
+										<span className='result-name'>{result.name}</span>
+									</button>
+									<Button
+										type='button'
+										mod='circle clear icon direction'
+										onClick={() => onDirectionClick(result)}
+										title='Построить маршрут'
+									>
+										<PathIcon />
+									</Button>
+								</li>
+							))}
+						</ul>
 
 						{searchResults.length === 0 &&
 							!searchError &&

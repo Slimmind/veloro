@@ -15,7 +15,7 @@ export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange }: MainMen
 	return (
 		<>
 			<Button mod='circle icon menu' onClick={onToggle}></Button>
-			<div className={`main-menu ${open ? '' : 'hidden'}`}>
+			<div className={`main-menu ${open ? '' : 'hidden'}`} onClick={onToggle}>
 				<BikeLegend />
 				<MapStyleSwitcher activeStyle={activeStyle} onChange={onStyleChange} />
 			</div>

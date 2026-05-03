@@ -5,7 +5,7 @@
   background-color: var(--color-violet-transparent);
   backdrop-filter: blur(var(--blur));
   border: 0;
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: var(--shadow);
   color: var(--color-violet);
   cursor: pointer;
@@ -22,6 +22,12 @@
   box-shadow: 0 0 0 4px var(--color-violet);
 }
 
+.btn--clear {
+  background-color: transparent;
+  backdrop-filter: unset;
+  box-shadow: none;
+}
+
 .btn--circle {
   width: 40px;
   height: 40px;
@@ -29,6 +35,9 @@
 }
 
 .btn--icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 0;
 }
 

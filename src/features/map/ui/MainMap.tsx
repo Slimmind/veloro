@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	MapContainer,
 	Marker,
@@ -18,13 +18,14 @@ import shadow from 'leaflet/dist/images/marker-shadow.png';
 import { BikePathsMlLayer } from './BikePathsMlLayer';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
+import { RouteLine } from './RouteLine';
 import { UserLocation } from './UserLocation';
 import { VectorTileLayer } from './VectorTileLayer';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
 import { MAP_STYLES } from '../model/map-styles';
 import type { MapStyleKey } from '../model/map-styles';
-import { useUserGeolocation } from '../../../hooks/useUserGeolocation';
-
+import type { RouteResult } from '../model/useRoute';
+import type { UseGeolocationReturn } from '../../../hooks/useUserGeolocation';
 import type { SearchResult } from '../../../entities/search';
 
 import 'leaflet/dist/leaflet.css';
@@ -40,7 +41,22 @@ L.Icon.Default.mergeOptions({
 interface MainMapProps {
 	selectedResult: SearchResult | null;
 	activeStyle: MapStyleKey;
+	geolocation: UseGeolocationReturn;
+	route: RouteResult | null;
 }
+
+const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom?: number) => Promise<string | null> }) => {
+	const map = useMap();
+	const initialized = useRef(false);
+
+	useEffect(() => {
+		if (initialized.current) return;
+		initialized.current = true;
+		findMe(map, 14);
+	}, [map, findMe]);
+
+	return null;
+};
 
 const SearchViewUpdater = ({
 	position,
@@ -57,11 +73,11 @@ const SearchViewUpdater = ({
 	return null;
 };
 
-export const MainMap = ({ selectedResult, activeStyle }: MainMapProps) => {
+export const MainMap = ({ selectedResult, activeStyle, geolocation, route }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
-	const { position, accuracy, findMe, loading, error } = useUserGeolocation();
 
+	const { position, accuracy, findMe, loading, error } = geolocation;
 	const currentStyle = MAP_STYLES[activeStyle];
 
 	useEffect(() => {
@@ -81,6 +97,7 @@ export const MainMap = ({ selectedResult, activeStyle }: MainMapProps) => {
 				dragging={true}
 			>
 				<ZoomControl position='bottomright' />
+				<MapInitializer findMe={findMe} />
 				<FindMeButton findMe={findMe} loading={loading} error={error} />
 
 				{currentStyle.type === 'vector' ? (
@@ -94,14 +111,12 @@ export const MainMap = ({ selectedResult, activeStyle }: MainMapProps) => {
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} />
 
+				{route && <RouteLine coordinates={route.coordinates} />}
+
 				<SearchViewUpdater position={selectedResult?.position} />
 				{selectedResult && (
 					<Marker position={selectedResult.position} icon={BIKE_MARKER_ICON}>
-						<Popup>
-							{/* <strong>🔍 Найдено:</strong> */}
-							{/* <br /> */}
-							{selectedResult.name}
-						</Popup>
+						<Popup>{selectedResult.name}</Popup>
 					</Marker>
 				)}
 			</MapContainer>
