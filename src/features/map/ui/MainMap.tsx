@@ -6,6 +6,7 @@ import {
 	TileLayer,
 	ZoomControl,
 	useMap,
+	useMapEvents,
 } from 'react-leaflet';
 import L from 'leaflet';
 import type { LatLngBounds, LatLngTuple } from 'leaflet';
@@ -43,6 +44,9 @@ interface MainMapProps {
 	activeStyle: MapStyleKey;
 	geolocation: UseGeolocationReturn;
 	route: RouteResult | null;
+	pickingPoint?: boolean;
+	routeFromPoint?: LatLngTuple | null;
+	onMapClick?: (latlng: LatLngTuple) => void;
 }
 
 const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom?: number) => Promise<string | null> }) => {
@@ -58,11 +62,7 @@ const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom
 	return null;
 };
 
-const SearchViewUpdater = ({
-	position,
-}: {
-	position: LatLngTuple | undefined;
-}) => {
+const SearchViewUpdater = ({ position }: { position: LatLngTuple | undefined }) => {
 	const map = useMap();
 
 	useEffect(() => {
@@ -73,7 +73,24 @@ const SearchViewUpdater = ({
 	return null;
 };
 
-export const MainMap = ({ selectedResult, activeStyle, geolocation, route }: MainMapProps) => {
+const MapClickHandler = ({ onClick }: { onClick: (latlng: LatLngTuple) => void }) => {
+	useMapEvents({
+		click(e) {
+			onClick([e.latlng.lat, e.latlng.lng]);
+		},
+	});
+	return null;
+};
+
+export const MainMap = ({
+	selectedResult,
+	activeStyle,
+	geolocation,
+	route,
+	pickingPoint = false,
+	routeFromPoint = null,
+	onMapClick,
+}: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
 
@@ -85,7 +102,7 @@ export const MainMap = ({ selectedResult, activeStyle, geolocation, route }: Mai
 	}, [activeStyle]);
 
 	return (
-		<div className='main-map'>
+		<div className={`main-map ${pickingPoint ? 'main-map--picking' : ''}`}>
 			<MapContainer
 				center={selectedResult?.position || ([53.9, 27.56] as LatLngTuple)}
 				zoom={selectedResult ? 15 : 13}
@@ -112,6 +129,14 @@ export const MainMap = ({ selectedResult, activeStyle, geolocation, route }: Mai
 				<UserLocation position={position} accuracy={accuracy} />
 
 				{route && <RouteLine coordinates={route.coordinates} />}
+
+				{onMapClick && <MapClickHandler onClick={onMapClick} />}
+
+				{routeFromPoint && (
+					<Marker position={routeFromPoint} icon={BIKE_MARKER_ICON}>
+						<Popup>Начало маршрута</Popup>
+					</Marker>
+				)}
 
 				<SearchViewUpdater position={selectedResult?.position} />
 				{selectedResult && (

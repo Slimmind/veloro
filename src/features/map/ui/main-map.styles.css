@@ -6,6 +6,11 @@
   z-index: 0;
 }
 
+.main-map--picking,
+.main-map--picking .leaflet-container {
+  cursor: crosshair !important;
+}
+
 /* Кастомизация попапа */
 .leaflet-popup-content-wrapper {
   border-radius: 8px;
@@ -190,7 +195,6 @@
 
 .map-style-switcher__title {
   margin-bottom: 8px;
-  color: var(--color-black);
 }
 
 .map-style-switcher__container {

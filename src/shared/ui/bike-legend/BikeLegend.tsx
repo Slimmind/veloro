@@ -4,7 +4,7 @@ import './bike-legend.styles.css';
 export const BikeLegend = () => {
 	return (
 		<div className='bike-legend'>
-			<h5 className='bike-legend-title'>🚴 Типы велодорожек</h5>
+			<h5 className='bike-legend-title'>Типы велодорожек</h5>
 			<ul className='bike-legend-list'>
 				{Object.entries(BIKE_PATH_STYLES).map(([key, style]) => (
 					<li key={key} className='bike-legend-list-item'>
@@ -18,7 +18,7 @@ export const BikeLegend = () => {
 								flexShrink: 0,
 							}}
 						/>
-						<span style={{ color: '#374151', lineHeight: 1.3 }}>
+						<span>
 							{style.label}
 						</span>
 					</li>

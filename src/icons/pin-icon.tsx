@@ -1,4 +1,8 @@
-export const PinIcon = () => (
+type IconProps = {
+	color?: string;
+}
+
+export const PinIcon = ({ color = "#535bf2" }: IconProps) => (
 	<svg
 		xmlns='http://www.w3.org/2000/svg'
 		width='24'
@@ -7,7 +11,7 @@ export const PinIcon = () => (
 		viewBox='0 0 24 24'
 	>
 		<path
-			stroke='#535bf2'
+			stroke={color}
 			strokeLinecap='round'
 			strokeLinejoin='round'
 			strokeWidth='1.5'

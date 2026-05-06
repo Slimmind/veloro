@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { MainHeader, useMapSearch, type SearchResult } from '../features/search';
+import type { LatLngTuple } from 'leaflet';
+import { MainHeader, PathBuilder, useMapSearch, type SearchResult } from '../features/search';
+import type { RouteMode } from '../features/search';
 import { MainMap } from '../features/map';
 import { useRoute } from '../features/map/model/useRoute';
 import { DEFAULT_MAP_STYLE } from '../features/map/model/map-styles';
@@ -10,6 +12,9 @@ export const App = () => {
 	const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
 	const [activeStyle, setActiveStyle] = useState<MapStyleKey>(DEFAULT_MAP_STYLE);
 	const [pendingRoute, setPendingRoute] = useState<SearchResult | null>(null);
+	const [pathBuilderOpen, setPathBuilderOpen] = useState(false);
+	const [routeMode, setRouteMode] = useState<RouteMode | null>(null);
+	const [routeFromPoint, setRouteFromPoint] = useState<LatLngTuple | null>(null);
 
 	const geolocation = useUserGeolocation();
 	const { route, buildRoute } = useRoute();
@@ -51,6 +56,36 @@ export const App = () => {
 		[geolocation, buildRoute],
 	);
 
+	const handleModeSelect = useCallback((mode: RouteMode) => {
+		setRouteMode(mode);
+		setRouteFromPoint(null);
+	}, []);
+
+	const handleMapClick = useCallback(
+		(latlng: LatLngTuple) => {
+			if (!routeMode) return;
+
+			if (routeMode === 'from-me') {
+				if (geolocation.position) {
+					buildRoute(geolocation.position, latlng);
+				} else {
+					setPendingRoute({ name: '', position: latlng });
+					geolocation.findMe();
+				}
+				setRouteMode(null);
+			} else if (routeMode === 'point-to-point') {
+				if (!routeFromPoint) {
+					setRouteFromPoint(latlng);
+				} else {
+					buildRoute(routeFromPoint, latlng);
+					setRouteFromPoint(null);
+					setRouteMode(null);
+				}
+			}
+		},
+		[routeMode, routeFromPoint, geolocation, buildRoute],
+	);
+
 	return (
 		<div className='app'>
 			<MainHeader
@@ -63,11 +98,19 @@ export const App = () => {
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
 			/>
+			<PathBuilder
+				open={pathBuilderOpen}
+				onToggle={() => setPathBuilderOpen((p) => !p)}
+				onModeSelect={handleModeSelect}
+			/>
 			<MainMap
 				selectedResult={selectedResult}
 				activeStyle={activeStyle}
 				geolocation={geolocation}
 				route={route}
+				pickingPoint={routeMode !== null}
+				routeFromPoint={routeFromPoint}
+				onMapClick={handleMapClick}
 			/>
 		</div>
 	);
