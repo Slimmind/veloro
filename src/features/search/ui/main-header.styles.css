@@ -93,6 +93,15 @@
   flex-shrink: 0;
 }
 
+.result-distance {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-violet);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+
 .search-error,
 .search-no-results {
   padding: 12px 14px;

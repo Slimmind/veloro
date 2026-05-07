@@ -97,6 +97,7 @@ export const App = () => {
 				searchError={error}
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
+				userPosition={geolocation.position}
 			/>
 			<PathBuilder
 				open={pathBuilderOpen}

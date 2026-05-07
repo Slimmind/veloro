@@ -11,13 +11,13 @@ const ROUTE_MODES: { mode: RouteMode; label: string; description: string; icon: 
 	{
 		mode: 'from-me',
 		label: 'От моего местоположения',
-		description: 'Нажмите на точку назначения',
+		description: 'Укажите точку назначения на карте',
 		icon: <CurrentToPoint />,
 	},
 	{
 		mode: 'point-to-point',
 		label: 'От точки до точки',
-		description: 'Нажмите на начало, затем на конец',
+		description: 'Укажите точку начала, затем точку конца маршрута',
 		icon: <PointToPointIcon />,
 	},
 ];
