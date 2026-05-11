@@ -17,4 +17,4 @@ export const MAP_STYLES = {
 } as const;
 
 export type MapStyleKey = keyof typeof MAP_STYLES;
-export const DEFAULT_MAP_STYLE: MapStyleKey = 'liberty';
+export const DEFAULT_MAP_STYLE: MapStyleKey = 'bright';

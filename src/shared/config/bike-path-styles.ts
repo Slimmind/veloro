@@ -2,7 +2,7 @@ export const BIKE_PATH_STYLES = {
 	cycleway: {
 		color: '#535bf2',
 		weight: 5,
-		opacity: 1,
+		opacity: 0.5,
 		label: 'Выделенная велодорожка',
 		pattern: 'solid' as const,
 	},

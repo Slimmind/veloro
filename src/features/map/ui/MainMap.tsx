@@ -24,6 +24,7 @@ import { UserLocation } from './UserLocation';
 import { VectorTileLayer } from './VectorTileLayer';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
 import { MAP_STYLES } from '../model/map-styles';
+import { removeLatinLabels } from '../model/removeLatinLabels';
 import type { MapStyleKey } from '../model/map-styles';
 import type { RouteResult } from '../model/useRoute';
 import type { UseGeolocationReturn } from '../../../hooks/useUserGeolocation';
@@ -100,6 +101,11 @@ export const MainMap = ({
 	useEffect(() => {
 		setMlMap(null);
 	}, [activeStyle]);
+
+	useEffect(() => {
+		if (!mlMap) return;
+		removeLatinLabels(mlMap);
+	}, [mlMap]);
 
 	return (
 		<div className={`main-map ${pickingPoint ? 'main-map--picking' : ''}`}>
