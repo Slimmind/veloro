@@ -1,3 +1,5 @@
+export const SATELLITE_BIKE_COLOR = 'rgba(255, 102, 0, 0.75)';
+
 export const BIKE_PATH_STYLES = {
 	cycleway: {
 		color: '#535bf2',
@@ -21,7 +23,7 @@ export const BIKE_PATH_STYLES = {
 		pattern: 'dashed' as const,
 	},
 	shared: {
-		color: '#f59e0b',
+		color: '#d40000',
 		weight: 3,
 		opacity: 0.7,
 		label: 'Общая дорога (допустимо для вело)',

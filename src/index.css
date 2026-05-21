@@ -32,7 +32,8 @@
   --color-violet-light: rgb(100, 108, 255);
   --color-violet-transparent: rgba(83, 91, 242, var(--opacity));
   --color-white-transparent: rgba(255, 255, 255, var(--opacity));
-  --color-magenta: #ff00ff;
+  --color-magenta: rgb(255, 0, 255);
+  --color-magenta-transparent: rgba(255, 0, 255, var(--opacity));
 }
 
 *,

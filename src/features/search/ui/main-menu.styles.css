@@ -7,7 +7,7 @@
   border: 1px solid var(--color-violet-transparent);
   border-radius: 1rem;
   box-shadow: var(--shadow);
-  transform-origin: top left;
+  transform-origin: top right;
   animation: pb-slide-up 0.15s ease-out;
   z-index: 1000;
 }

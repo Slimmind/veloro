@@ -1,21 +1,21 @@
 .path-builder-root {
   position: fixed;
   bottom: 20px;
-  left: 20px;
+  right: 20px;
   z-index: 1001;
 }
 
 .path-builder {
   position: absolute;
   bottom: 50px;
-  left: 0;
+  right: 0;
   min-width: 230px;
   background: var(--color-white-transparent);
   backdrop-filter: blur(var(--blur));
   border: 1px solid var(--color-violet-transparent);
   border-radius: 1rem;
   box-shadow: var(--shadow);
-  transform-origin: 0% 100%;
+  transform-origin: 100% 100%;
   animation: pb-slide-down 0.15s ease-out;
 }
 

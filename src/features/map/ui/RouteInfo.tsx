@@ -3,6 +3,7 @@ import './route-info.styles.css';
 interface RouteInfoProps {
 	distance: number;
 	duration: number;
+	traveled?: number;
 }
 
 function formatDistance(metres: number): string {
@@ -19,10 +20,20 @@ function formatDuration(seconds: number): string {
 	return m > 0 ? `${h} ч ${m} мин` : `${h} ч`;
 }
 
-export const RouteInfo = ({ distance, duration }: RouteInfoProps) => (
+export const RouteInfo = ({ distance, duration, traveled }: RouteInfoProps) => (
 	<div className='route-info'>
-		<span className='route-info__item'>{formatDistance(distance)}</span>
-		<span className='route-info__divider' />
-		<span className='route-info__item'>{formatDuration(duration)}</span>
+		{traveled != null && traveled > 0 ? (
+			<>
+				<span className='route-info__item'>{formatDistance(traveled)}</span>
+				<span className='route-info__divider' />
+				<span className='route-info__item'>{formatDistance(distance)}</span>
+			</>
+		) : (
+			<>
+				<span className='route-info__item'>{formatDistance(distance)}</span>
+				<span className='route-info__divider' />
+				<span className='route-info__item'>{formatDuration(duration)}</span>
+			</>
+		)}
 	</div>
 );

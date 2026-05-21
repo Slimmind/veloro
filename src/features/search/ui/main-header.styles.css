@@ -65,14 +65,13 @@
 }
 
 .search-result-item {
-  width: calc(100% - 50px);
+  width: 100%;
   padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
   background: none;
-  border: solid var(--color-violet-transparent);
-  border-width: 0 1px 0 0;
+  border: 0;
   text-align: left;
   cursor: pointer;
   font-size: 14px;

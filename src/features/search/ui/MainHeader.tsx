@@ -6,12 +6,10 @@ import { Button } from '../../../shared/ui/button';
 import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MainMenu } from './MainMenu';
 import { PinIcon } from '../../../icons/pin-icon';
-import { PathIcon } from '../../../icons/path-icon';
 import { HistoryIcon } from '../../../icons/history-icon';
 import './main-header.styles.css';
 
 interface MainHeaderProps {
-	onSearchSelect: (result: SearchResult) => void;
 	onSearch: (query: string) => Promise<void>;
 	onDirectionClick: (result: SearchResult) => void;
 	searchLoading?: boolean;
@@ -44,7 +42,6 @@ function formatDistance(meters: number): string {
 }
 
 export const MainHeader = ({
-	onSearchSelect,
 	onSearch,
 	onDirectionClick,
 	searchLoading = false,
@@ -97,7 +94,7 @@ export const MainHeader = ({
 	const handleSelect = (result: { name: string; position: LatLngTuple }) => {
 		setSearchQuery(result.name);
 		setShowResults(false);
-		onSearchSelect(result);
+		onDirectionClick(result);
 	};
 
 	const clearInput = () => {
@@ -110,11 +107,11 @@ export const MainHeader = ({
 				open={menuOpen}
 				onToggle={handleMenuToggle}
 				activeStyle={activeStyle}
-				onStyleChange={onStyleChange}
+				onStyleChange={(style) => { onStyleChange(style); setMenuOpen(false); }}
 			/>
 			{legendVisible && !menuOpen && (
 				<div className='bike-legend-panel'>
-					<BikeLegend />
+					<BikeLegend isSatellite={activeStyle === 'satellite'} />
 				</div>
 			)}
 			<form onSubmit={handleSubmit} className='search-form' ref={dropdownRef}>
@@ -167,10 +164,10 @@ export const MainHeader = ({
 									<ul>
 										{(userPosition
 											? [...searchResults].sort(
-													(a, b) =>
-														haversineDistance(userPosition, a.position) -
-														haversineDistance(userPosition, b.position),
-												)
+												(a, b) =>
+													haversineDistance(userPosition, a.position) -
+													haversineDistance(userPosition, b.position),
+											)
 											: searchResults
 										).map((result, index) => (
 											<li key={index} className='search-result-item-wrapper'>
@@ -194,17 +191,6 @@ export const MainHeader = ({
 														</span>
 													)}
 												</button>
-												<Button
-													type='button'
-													mod='circle clear icon direction'
-													onClick={() => {
-														onDirectionClick(result);
-														setShowResults(false);
-													}}
-													title='Построить маршрут'
-												>
-													<PathIcon />
-												</Button>
 											</li>
 										))}
 									</ul>
@@ -241,17 +227,6 @@ export const MainHeader = ({
 															</span>
 														)}
 													</button>
-													<Button
-														type='button'
-														mod='circle clear icon direction'
-														onClick={() => {
-															onDirectionClick(result);
-															setShowResults(false);
-														}}
-														title='Построить маршрут'
-													>
-														<PathIcon />
-													</Button>
 												</li>
 											))}
 										</ul>

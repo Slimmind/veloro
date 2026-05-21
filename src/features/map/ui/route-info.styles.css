@@ -1,13 +1,13 @@
 .route-info {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
+  top: 70px;
+  right: 20px;
   z-index: 1000;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  background-color: var(--color-violet-transparent);
+  background-color: var(--color-magenta-transparent);
   --opacity: 0.85;
   backdrop-filter: blur(var(--blur));
   -webkit-backdrop-filter: blur(var(--blur));

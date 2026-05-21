@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { RouteIcon } from '../../../icons/route-icon';
 import './path-builder.styles.css';
@@ -29,13 +29,26 @@ interface PathBuilderProps {
 }
 
 export const PathBuilder = ({ open, onToggle, onModeSelect }: PathBuilderProps) => {
+	const rootRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		const handleClickOutside = (e: MouseEvent) => {
+			if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+				onToggle();
+			}
+		};
+		document.addEventListener('mousedown', handleClickOutside);
+		return () => document.removeEventListener('mousedown', handleClickOutside);
+	}, [open, onToggle]);
+
 	const handleSelect = (mode: RouteMode) => {
 		onModeSelect(mode);
 		onToggle();
 	};
 
 	return (
-		<div className='path-builder-root'>
+		<div className='path-builder-root' ref={rootRef}>
 			<Button mod='circle icon' onClick={onToggle} aria-label='Построить маршрут'>
 				<RouteIcon color='var(--color-white)' />
 			</Button>

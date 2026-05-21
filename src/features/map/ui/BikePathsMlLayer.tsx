@@ -3,7 +3,7 @@ import { useMap, useMapEvents } from 'react-leaflet';
 import type { GeoJSONSource, Map as MLMap } from 'maplibre-gl';
 import type { LatLngBounds } from 'leaflet';
 import { useBikePaths } from '../model/useBikePaths';
-import { BIKE_PATH_STYLES } from '../../../shared/config/bike-path-styles';
+import { BIKE_PATH_STYLES, SATELLITE_BIKE_COLOR } from '../../../shared/config/bike-path-styles';
 import type { BikePath } from '../../../entities/bikePath';
 
 const SOURCE_ID = 'bike-paths';
@@ -21,7 +21,7 @@ const toGeoJSON = (paths: BikePath[]) => ({
 	})),
 });
 
-const setupLayers = (mlMap: MLMap) => {
+const setupLayers = (mlMap: MLMap, isSatellite: boolean) => {
 	mlMap.addSource(SOURCE_ID, {
 		type: 'geojson',
 		data: { type: 'FeatureCollection', features: [] },
@@ -35,21 +35,25 @@ const setupLayers = (mlMap: MLMap) => {
 		minzoom: 12,
 		filter: ['!=', ['get', 'type'], 'track'],
 		paint: {
-			'line-color': ['match', ['get', 'type'],
-				'cycleway', BIKE_PATH_STYLES.cycleway.color,
-				'lane',     BIKE_PATH_STYLES.lane.color,
-				            BIKE_PATH_STYLES.shared.color,
-			],
+			'line-color': isSatellite
+				? SATELLITE_BIKE_COLOR
+				: ['match', ['get', 'type'],
+					'cycleway', BIKE_PATH_STYLES.cycleway.color,
+					'lane',     BIKE_PATH_STYLES.lane.color,
+					            BIKE_PATH_STYLES.shared.color,
+				],
 			'line-width': ['match', ['get', 'type'],
 				'cycleway', BIKE_PATH_STYLES.cycleway.weight,
 				'lane',     BIKE_PATH_STYLES.lane.weight,
 				            BIKE_PATH_STYLES.shared.weight,
 			],
-			'line-opacity': ['match', ['get', 'type'],
-				'cycleway', BIKE_PATH_STYLES.cycleway.opacity,
-				'lane',     BIKE_PATH_STYLES.lane.opacity,
-				            BIKE_PATH_STYLES.shared.opacity,
-			],
+			'line-opacity': isSatellite
+				? 1
+				: ['match', ['get', 'type'],
+					'cycleway', BIKE_PATH_STYLES.cycleway.opacity,
+					'lane',     BIKE_PATH_STYLES.lane.opacity,
+					            BIKE_PATH_STYLES.shared.opacity,
+				],
 		},
 	});
 
@@ -61,9 +65,9 @@ const setupLayers = (mlMap: MLMap) => {
 		minzoom: 12,
 		filter: ['==', ['get', 'type'], 'track'],
 		paint: {
-			'line-color':   BIKE_PATH_STYLES.track.color,
+			'line-color':   isSatellite ? SATELLITE_BIKE_COLOR : BIKE_PATH_STYLES.track.color,
 			'line-width':   BIKE_PATH_STYLES.track.weight,
-			'line-opacity': BIKE_PATH_STYLES.track.opacity,
+			'line-opacity': isSatellite ? 1 : BIKE_PATH_STYLES.track.opacity,
 			'line-dasharray': [3, 2],
 		},
 	});
@@ -73,9 +77,10 @@ interface BikePathsMlLayerProps {
 	mlMap: MLMap;
 	bounds: LatLngBounds | null;
 	minZoom?: number;
+	isSatellite?: boolean;
 }
 
-export const BikePathsMlLayer = ({ mlMap, bounds, minZoom = 12 }: BikePathsMlLayerProps) => {
+export const BikePathsMlLayer = ({ mlMap, bounds, minZoom = 12, isSatellite = false }: BikePathsMlLayerProps) => {
 	const map = useMap();
 	const [zoom, setZoom] = useState(() => map.getZoom());
 
@@ -85,7 +90,7 @@ export const BikePathsMlLayer = ({ mlMap, bounds, minZoom = 12 }: BikePathsMlLay
 
 	// Add source + layers once
 	useEffect(() => {
-		setupLayers(mlMap);
+		setupLayers(mlMap, isSatellite);
 		return () => {
 			try {
 				if (mlMap.getLayer('bike-paths-solid')) mlMap.removeLayer('bike-paths-solid');

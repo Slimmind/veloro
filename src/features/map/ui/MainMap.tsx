@@ -19,7 +19,8 @@ import shadow from 'leaflet/dist/images/marker-shadow.png';
 import { BikePathsMlLayer } from './BikePathsMlLayer';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
-import { RouteLine } from './RouteLine';
+import { RouteLine, findClosestIndex, traveledDistance } from './RouteLine';
+import { RouteInfo } from './RouteInfo';
 import { UserLocation } from './UserLocation';
 import { VectorTileLayer } from './VectorTileLayer';
 import { BIKE_MARKER_ICON, BIKE_MARKER_ICON_SATELLITE } from '../model/map-marker';
@@ -29,8 +30,6 @@ import { buildSatelliteHybridStyle } from '../model/buildSatelliteHybridStyle';
 import type { MapStyleKey } from '../model/map-styles';
 import type { RouteResult } from '../model/useRoute';
 import type { UseGeolocationReturn } from '../../../hooks/useUserGeolocation';
-import type { SearchResult } from '../../../entities/search';
-
 import 'leaflet/dist/leaflet.css';
 import './main-map.styles.css';
 
@@ -42,7 +41,6 @@ L.Icon.Default.mergeOptions({
 });
 
 interface MainMapProps {
-	selectedResult: SearchResult | null;
 	activeStyle: MapStyleKey;
 	geolocation: UseGeolocationReturn;
 	route: RouteResult | null;
@@ -64,17 +62,6 @@ const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom
 	return null;
 };
 
-const SearchViewUpdater = ({ position }: { position: LatLngTuple | undefined }) => {
-	const map = useMap();
-
-	useEffect(() => {
-		if (!position) return;
-		map.setView(position, 15, { animate: true });
-	}, [map, position]);
-
-	return null;
-};
-
 const MapClickHandler = ({ onClick }: { onClick: (latlng: LatLngTuple) => void }) => {
 	useMapEvents({
 		click(e) {
@@ -85,7 +72,6 @@ const MapClickHandler = ({ onClick }: { onClick: (latlng: LatLngTuple) => void }
 };
 
 export const MainMap = ({
-	selectedResult,
 	activeStyle,
 	geolocation,
 	route,
@@ -113,11 +99,21 @@ export const MainMap = ({
 		removeLatinLabels(mlMap);
 	}, [mlMap]);
 
+	const routeTraveled = route && position
+		? (() => {
+			const idx = findClosestIndex(route.coordinates, position);
+			return idx > 0 ? traveledDistance(route.coordinates, idx) : 0;
+		})()
+		: 0;
+
 	return (
 		<div className={`main-map ${pickingPoint ? 'main-map--picking' : ''}`}>
+			{route && (
+				<RouteInfo distance={route.distance} duration={route.duration} traveled={routeTraveled} />
+			)}
 			<MapContainer
-				center={selectedResult?.position || ([53.9, 27.56] as LatLngTuple)}
-				zoom={selectedResult ? 15 : 13}
+				center={[53.9, 27.56] as LatLngTuple}
+				zoom={13}
 				style={{ height: '100%', width: '100%' }}
 				zoomControl={false}
 				scrollWheelZoom={true}
@@ -135,12 +131,12 @@ export const MainMap = ({
 					<VectorTileLayer styleObject={satelliteStyle} onReady={setMlMap} />
 				) : null}
 
-				{mlMap && <BikePathsMlLayer mlMap={mlMap} bounds={mapBounds} minZoom={12} />}
+				{mlMap && <BikePathsMlLayer mlMap={mlMap} bounds={mapBounds} minZoom={12} isSatellite={activeStyle === 'satellite'} />}
 
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} icon={markerIcon} />
 
-				{route && <RouteLine coordinates={route.coordinates} distance={route.distance} duration={route.duration} userPosition={position} />}
+				{route && <RouteLine coordinates={route.coordinates} userPosition={position} />}
 
 				{onMapClick && <MapClickHandler onClick={onMapClick} />}
 
@@ -150,12 +146,6 @@ export const MainMap = ({
 					</Marker>
 				)}
 
-				<SearchViewUpdater position={selectedResult?.position} />
-				{selectedResult && (
-					<Marker position={selectedResult.position} icon={markerIcon}>
-						<Popup>{selectedResult.name}</Popup>
-					</Marker>
-				)}
 			</MapContainer>
 		</div>
 	);
