@@ -1,0 +1,32 @@
+.route-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background-color: var(--color-violet-transparent);
+  --opacity: 0.85;
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  color: var(--color-white);
+  font-size: 0.9rem;
+  font-weight: 500;
+  pointer-events: none;
+  animation: slideUp 0.2s ease;
+}
+
+.route-info__item {
+  white-space: nowrap;
+}
+
+.route-info__divider {
+  width: 1px;
+  height: 16px;
+  background-color: rgba(255, 255, 255, 0.35);
+  border-radius: 1px;
+}

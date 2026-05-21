@@ -140,7 +140,7 @@ export const MainMap = ({
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} icon={markerIcon} />
 
-				{route && <RouteLine coordinates={route.coordinates} userPosition={position} />}
+				{route && <RouteLine coordinates={route.coordinates} distance={route.distance} duration={route.duration} userPosition={position} />}
 
 				{onMapClick && <MapClickHandler onClick={onMapClick} />}
 
