@@ -117,6 +117,26 @@
   margin: 4px;
 }
 
+.route-error {
+  position: fixed;
+  top: 58px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-red-softer);
+  border: 1px solid var(--color-red-soft);
+  border-radius: 10px;
+  color: var(--color-red);
+  font-size: 13px;
+  box-shadow: var(--shadow);
+  z-index: 2001;
+  animation: slideDown 0.15s ease;
+}
+
 /* 🔁 Мини-спиннер */
 .spinner-mini {
   width: 16px;

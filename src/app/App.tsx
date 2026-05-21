@@ -17,7 +17,7 @@ export const App = () => {
 	const [routeFromPoint, setRouteFromPoint] = useState<LatLngTuple | null>(null);
 
 	const geolocation = useUserGeolocation();
-	const { route, buildRoute } = useRoute();
+	const { route, buildRoute, error: routeError, clearRoute } = useRoute();
 	const { results, loading, error, search, clearResults } = useMapSearch();
 
 	// Build pending route once geolocation becomes available
@@ -95,6 +95,8 @@ export const App = () => {
 				searchLoading={loading}
 				searchResults={results}
 				searchError={error}
+				routeError={routeError}
+				onRouteDismiss={clearRoute}
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
 				userPosition={geolocation.position}

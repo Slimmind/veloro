@@ -31,8 +31,12 @@ export async function fetchRoute(
 	});
 
 	if (!res.ok) {
-		const text = await res.text().catch(() => res.statusText);
-		throw new Error(`ORS error ${res.status}: ${text}`);
+		const json = await res.json().catch(() => null);
+		const orsMessage = json?.error?.message as string | undefined;
+		if (orsMessage?.toLowerCase().includes('routable point')) {
+			throw new Error('Не удалось построить маршрут: точка назначения недостижима (возможно, это водоём или закрытая территория). Попробуйте построить маршрут к точке на карте от вашего текущего метоположения.');
+		}
+		throw new Error(orsMessage ?? `Ошибка маршрутизации (${res.status})`);
 	}
 
 	const data = await res.json();

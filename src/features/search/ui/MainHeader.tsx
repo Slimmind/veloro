@@ -16,6 +16,8 @@ interface MainHeaderProps {
 	searchLoading?: boolean;
 	searchResults?: SearchResult[];
 	searchError?: string | null;
+	routeError?: string | null;
+	onRouteDismiss?: () => void;
 	activeStyle: MapStyleKey;
 	onStyleChange: (style: MapStyleKey) => void;
 	userPosition?: LatLngTuple | null;
@@ -44,6 +46,8 @@ export const MainHeader = ({
 	searchLoading = false,
 	searchResults = [],
 	searchError = null,
+	routeError = null,
+	onRouteDismiss,
 	activeStyle,
 	onStyleChange,
 	userPosition = null,
@@ -169,6 +173,14 @@ export const MainHeader = ({
 					</div>
 				)}
 			</form>
+			{routeError && (
+				<div className='route-error' role='alert'>
+					<span>{routeError}</span>
+					{onRouteDismiss && (
+						<Button mod='circle cross error' onClick={onRouteDismiss} aria-label='Закрыть' />
+					)}
+				</div>
+			)}
 		</header>
 	);
 };
