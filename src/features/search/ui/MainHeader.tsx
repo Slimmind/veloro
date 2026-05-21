@@ -7,6 +7,7 @@ import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MainMenu } from './MainMenu';
 import { PinIcon } from '../../../icons/pin-icon';
 import { PathIcon } from '../../../icons/path-icon';
+import { HistoryIcon } from '../../../icons/history-icon';
 import './main-header.styles.css';
 
 interface MainHeaderProps {
@@ -18,6 +19,7 @@ interface MainHeaderProps {
 	searchError?: string | null;
 	routeError?: string | null;
 	onRouteDismiss?: () => void;
+	routeHistory?: SearchResult[];
 	activeStyle: MapStyleKey;
 	onStyleChange: (style: MapStyleKey) => void;
 	userPosition?: LatLngTuple | null;
@@ -30,7 +32,9 @@ function haversineDistance(a: LatLngTuple, b: LatLngTuple): number {
 	const dLon = toRad(b[1] - a[1]);
 	const sinLat = Math.sin(dLat / 2);
 	const sinLon = Math.sin(dLon / 2);
-	const h = sinLat * sinLat + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * sinLon * sinLon;
+	const h =
+		sinLat * sinLat +
+		Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * sinLon * sinLon;
 	return R * 2 * Math.asin(Math.sqrt(h));
 }
 
@@ -48,6 +52,7 @@ export const MainHeader = ({
 	searchError = null,
 	routeError = null,
 	onRouteDismiss,
+	routeHistory = [],
 	activeStyle,
 	onStyleChange,
 	userPosition = null,
@@ -101,7 +106,12 @@ export const MainHeader = ({
 
 	return (
 		<header className='main-header'>
-			<MainMenu open={menuOpen} onToggle={handleMenuToggle} activeStyle={activeStyle} onStyleChange={onStyleChange} />
+			<MainMenu
+				open={menuOpen}
+				onToggle={handleMenuToggle}
+				activeStyle={activeStyle}
+				onStyleChange={onStyleChange}
+			/>
 			{legendVisible && !menuOpen && (
 				<div className='bike-legend-panel'>
 					<BikeLegend />
@@ -112,8 +122,20 @@ export const MainHeader = ({
 					<input
 						name='path'
 						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						onFocus={() => searchResults.length > 0 && setShowResults(true)}
+						onChange={(e) => {
+							const value = e.target.value;
+							setSearchQuery(value);
+							if (!value && routeHistory.length > 0) {
+								setShowResults(true);
+							} else if (value) {
+								setShowResults(false);
+							}
+						}}
+						onFocus={() =>
+							(searchResults.length > 0 ||
+								(!searchQuery && routeHistory.length > 0)) &&
+							setShowResults(true)
+						}
 						placeholder='Поиск...'
 						className='search-input'
 						autoComplete='off'
@@ -132,52 +154,122 @@ export const MainHeader = ({
 					{searchLoading && <span className='spinner-mini' />}
 				</Button>
 
-				{showResults && (searchResults.length > 0 || searchError) && (
-					<div className='search-results-dropdown'>
-						{searchError && <div className='search-error'>{searchError}</div>}
-						<ul>
-							{searchResults.map((result, index) => (
-								<li key={index} className='search-result-item-wrapper'>
-									<button
-										className='search-result-item'
-										type='button'
-										onClick={() => handleSelect(result)}
-									>
-										<span className='result-icon'>
-											<PinIcon />
-										</span>
-										<span className='result-name'>{result.name}</span>
-										{userPosition && (
-											<span className='result-distance'>
-												{formatDistance(haversineDistance(userPosition, result.position))}
-											</span>
+				{showResults &&
+					(searchResults.length > 0 ||
+						searchError ||
+						(!searchQuery && routeHistory.length > 0)) && (
+						<div className='search-results-dropdown'>
+							{searchQuery ? (
+								<>
+									{searchError && (
+										<div className='search-error'>{searchError}</div>
+									)}
+									<ul>
+										{(userPosition
+											? [...searchResults].sort(
+													(a, b) =>
+														haversineDistance(userPosition, a.position) -
+														haversineDistance(userPosition, b.position),
+												)
+											: searchResults
+										).map((result, index) => (
+											<li key={index} className='search-result-item-wrapper'>
+												<button
+													className='search-result-item'
+													type='button'
+													onClick={() => handleSelect(result)}
+												>
+													<span className='result-icon'>
+														<PinIcon />
+													</span>
+													<span className='result-name'>{result.name}</span>
+													{userPosition && (
+														<span className='result-distance'>
+															{formatDistance(
+																haversineDistance(
+																	userPosition,
+																	result.position,
+																),
+															)}
+														</span>
+													)}
+												</button>
+												<Button
+													type='button'
+													mod='circle clear icon direction'
+													onClick={() => {
+														onDirectionClick(result);
+														setShowResults(false);
+													}}
+													title='Построить маршрут'
+												>
+													<PathIcon />
+												</Button>
+											</li>
+										))}
+									</ul>
+									{searchResults.length === 0 &&
+										!searchError &&
+										searchQuery.trim() && (
+											<div className='search-no-results'>Ничего не найдено</div>
 										)}
-									</button>
-									<Button
-										type='button'
-										mod='circle clear icon direction'
-										onClick={() => { onDirectionClick(result); setShowResults(false); }}
-										title='Построить маршрут'
-									>
-										<PathIcon />
-									</Button>
-								</li>
-							))}
-						</ul>
-
-						{searchResults.length === 0 &&
-							!searchError &&
-							searchQuery.trim() && (
-								<div className='search-no-results'>Ничего не найдено</div>
+								</>
+							) : (
+								routeHistory.length > 0 && (
+									<>
+										<h5 className='history-label'>Недавние маршруты</h5>
+										<ul>
+											{routeHistory.map((result, index) => (
+												<li key={index} className='search-result-item-wrapper'>
+													<button
+														className='search-result-item'
+														type='button'
+														onClick={() => handleSelect(result)}
+													>
+														<span className='result-icon'>
+															<HistoryIcon />
+														</span>
+														<span className='result-name'>{result.name}</span>
+														{userPosition && (
+															<span className='result-distance'>
+																{formatDistance(
+																	haversineDistance(
+																		userPosition,
+																		result.position,
+																	),
+																)}
+															</span>
+														)}
+													</button>
+													<Button
+														type='button'
+														mod='circle clear icon direction'
+														onClick={() => {
+															onDirectionClick(result);
+															setShowResults(false);
+														}}
+														title='Построить маршрут'
+													>
+														<PathIcon />
+													</Button>
+												</li>
+											))}
+										</ul>
+									</>
+								)
 							)}
-					</div>
-				)}
+						</div>
+					)}
 			</form>
 			{routeError && (
 				<div className='route-error' role='alert'>
 					<span>{routeError}</span>
 					{onRouteDismiss && (
-						<Button mod='circle cross error' onClick={onRouteDismiss} aria-label='Закрыть' />
+						<Button
+							mod='circle cross error'
+							onClick={onRouteDismiss}
+							aria-label='Закрыть'
+						/>
 					)}
 				</div>
 			)}

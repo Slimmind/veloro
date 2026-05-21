@@ -102,6 +102,12 @@
   white-space: nowrap;
 }
 
+.history-label {
+  padding: 8px 14px 4px;
+  color: var(--color-violet);
+  border-bottom: 1px solid var(--color-violet-transparent);
+}
+
 .search-error,
 .search-no-results {
   padding: 12px 14px;

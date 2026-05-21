@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
-import { MainHeader, PathBuilder, useMapSearch, type SearchResult } from '../features/search';
+import { MainHeader, PathBuilder, useMapSearch, useRouteHistory, type SearchResult } from '../features/search';
 import type { RouteMode } from '../features/search';
 import { MainMap } from '../features/map';
 import { useRoute } from '../features/map/model/useRoute';
@@ -19,6 +19,7 @@ export const App = () => {
 	const geolocation = useUserGeolocation();
 	const { route, buildRoute, error: routeError, clearRoute } = useRoute();
 	const { results, loading, error, search, clearResults } = useMapSearch();
+	const { history: routeHistory, addToHistory } = useRouteHistory();
 
 	// Build pending route once geolocation becomes available
 	useEffect(() => {
@@ -46,6 +47,7 @@ export const App = () => {
 
 	const handleDirectionClick = useCallback(
 		(result: SearchResult) => {
+			addToHistory(result);
 			if (geolocation.position) {
 				buildRoute(geolocation.position, result.position);
 			} else {
@@ -53,7 +55,7 @@ export const App = () => {
 				geolocation.findMe();
 			}
 		},
-		[geolocation, buildRoute],
+		[geolocation, buildRoute, addToHistory],
 	);
 
 	const handleModeSelect = useCallback((mode: RouteMode) => {
@@ -100,6 +102,7 @@ export const App = () => {
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
 				userPosition={geolocation.position}
+				routeHistory={routeHistory}
 			/>
 			<PathBuilder
 				open={pathBuilderOpen}
