@@ -1,13 +1,14 @@
 import { Circle, Marker, Popup } from 'react-leaflet';
-import type { LatLngTuple } from 'leaflet';
+import type { Icon, LatLngTuple } from 'leaflet';
 import { BIKE_MARKER_ICON } from '../model/map-marker';
 
 interface UserLocationProps {
 	position: LatLngTuple | null;
 	accuracy: number | null;
+	icon?: Icon;
 }
 
-export const UserLocation = ({ position, accuracy }: UserLocationProps) => {
+export const UserLocation = ({ position, accuracy, icon = BIKE_MARKER_ICON }: UserLocationProps) => {
 	if (!position) return null;
 
 	return (
@@ -27,7 +28,7 @@ export const UserLocation = ({ position, accuracy }: UserLocationProps) => {
 				</Circle>
 			)}
 
-			<Marker position={position} icon={BIKE_MARKER_ICON}>
+			<Marker position={position} icon={icon}>
 				<Popup>
 					<strong>🚴 Вы здесь</strong>
 					{accuracy && <br />}

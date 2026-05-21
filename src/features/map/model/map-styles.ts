@@ -10,7 +10,7 @@ export const MAP_STYLES = {
 		label: 'Bright',
 	},
 	satellite: {
-		type: 'raster' as const,
+		type: 'satellite' as const,
 		url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
 		label: 'Satellite',
 	},

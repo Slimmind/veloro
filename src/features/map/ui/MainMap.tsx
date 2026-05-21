@@ -3,14 +3,14 @@ import {
 	MapContainer,
 	Marker,
 	Popup,
-	TileLayer,
 	ZoomControl,
 	useMap,
 	useMapEvents,
 } from 'react-leaflet';
+
 import L from 'leaflet';
 import type { LatLngBounds, LatLngTuple } from 'leaflet';
-import type { Map as MLMap } from 'maplibre-gl';
+import type { Map as MLMap, StyleSpecification } from 'maplibre-gl';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
@@ -22,9 +22,10 @@ import { MapBoundsTracker } from './MapBoundsTracker';
 import { RouteLine } from './RouteLine';
 import { UserLocation } from './UserLocation';
 import { VectorTileLayer } from './VectorTileLayer';
-import { BIKE_MARKER_ICON } from '../model/map-marker';
+import { BIKE_MARKER_ICON, BIKE_MARKER_ICON_SATELLITE } from '../model/map-marker';
 import { MAP_STYLES } from '../model/map-styles';
 import { removeLatinLabels } from '../model/removeLatinLabels';
+import { buildSatelliteHybridStyle } from '../model/buildSatelliteHybridStyle';
 import type { MapStyleKey } from '../model/map-styles';
 import type { RouteResult } from '../model/useRoute';
 import type { UseGeolocationReturn } from '../../../hooks/useUserGeolocation';
@@ -94,12 +95,17 @@ export const MainMap = ({
 }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
+	const [satelliteStyle, setSatelliteStyle] = useState<StyleSpecification | null>(null);
 
 	const { position, accuracy, findMe, loading, error } = geolocation;
 	const currentStyle = MAP_STYLES[activeStyle];
+	const markerIcon = activeStyle === 'satellite' ? BIKE_MARKER_ICON_SATELLITE : BIKE_MARKER_ICON;
 
 	useEffect(() => {
 		setMlMap(null);
+		if (currentStyle.type === 'satellite') {
+			buildSatelliteHybridStyle(currentStyle.url).then(setSatelliteStyle);
+		}
 	}, [activeStyle]);
 
 	useEffect(() => {
@@ -125,28 +131,28 @@ export const MainMap = ({
 
 				{currentStyle.type === 'vector' ? (
 					<VectorTileLayer styleUrl={currentStyle.url} onReady={setMlMap} />
-				) : (
-					<TileLayer url={currentStyle.url} />
-				)}
+				) : satelliteStyle ? (
+					<VectorTileLayer styleObject={satelliteStyle} onReady={setMlMap} />
+				) : null}
 
 				{mlMap && <BikePathsMlLayer mlMap={mlMap} bounds={mapBounds} minZoom={12} />}
 
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
-				<UserLocation position={position} accuracy={accuracy} />
+				<UserLocation position={position} accuracy={accuracy} icon={markerIcon} />
 
-				{route && <RouteLine coordinates={route.coordinates} />}
+				{route && <RouteLine coordinates={route.coordinates} userPosition={position} />}
 
 				{onMapClick && <MapClickHandler onClick={onMapClick} />}
 
 				{routeFromPoint && (
-					<Marker position={routeFromPoint} icon={BIKE_MARKER_ICON}>
+					<Marker position={routeFromPoint} icon={markerIcon}>
 						<Popup>Начало маршрута</Popup>
 					</Marker>
 				)}
 
 				<SearchViewUpdater position={selectedResult?.position} />
 				{selectedResult && (
-					<Marker position={selectedResult.position} icon={BIKE_MARKER_ICON}>
+					<Marker position={selectedResult.position} icon={markerIcon}>
 						<Popup>{selectedResult.name}</Popup>
 					</Marker>
 				)}

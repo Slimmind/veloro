@@ -1,21 +1,23 @@
 import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import type { Map as MLMap } from 'maplibre-gl';
+import type { Map as MLMap, StyleSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@maplibre/maplibre-gl-leaflet';
 
 interface VectorTileLayerProps {
-	styleUrl: string;
+	styleUrl?: string;
+	styleObject?: StyleSpecification;
 	onReady?: (mlMap: MLMap) => void;
 }
 
-export const VectorTileLayer = ({ styleUrl, onReady }: VectorTileLayerProps) => {
+export const VectorTileLayer = ({ styleUrl, styleObject, onReady }: VectorTileLayerProps) => {
 	const map = useMap();
 	const layerRef = useRef<L.MaplibreGL | null>(null);
 
 	useEffect(() => {
-		const layer = L.maplibreGL({ style: styleUrl, minZoom: 1 });
+		const style = (styleObject ?? styleUrl)!;
+		const layer = L.maplibreGL({ style, minZoom: 1 });
 		layer.addTo(map);
 		layerRef.current = layer;
 
@@ -33,7 +35,7 @@ export const VectorTileLayer = ({ styleUrl, onReady }: VectorTileLayerProps) => 
 			map.removeLayer(layer);
 			layerRef.current = null;
 		};
-	}, [map, styleUrl]);
+	}, [map, styleUrl, styleObject]);
 
 	return null;
 };

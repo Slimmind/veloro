@@ -156,7 +156,7 @@ export const MainHeader = ({
 									<Button
 										type='button'
 										mod='circle clear icon direction'
-										onClick={() => onDirectionClick(result)}
+										onClick={() => { onDirectionClick(result); setShowResults(false); }}
 										title='Построить маршрут'
 									>
 										<PathIcon />
