@@ -23,7 +23,7 @@ export default defineConfig({
 
 			manifest: {
 				name: 'VeloRo',
-				short_name: 'veloro',
+				short_name: 'velchick',
 				description: 'convinient cycling',
 				theme_color: '#535bf2',
 			},

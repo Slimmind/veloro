@@ -1,0 +1,6 @@
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+[context.production]
+  environment = { SECRETS_SCAN_OMIT_KEYS = "VITE_PROJECT_ID" }

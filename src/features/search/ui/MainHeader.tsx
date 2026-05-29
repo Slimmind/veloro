@@ -7,6 +7,7 @@ import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MainMenu } from './MainMenu';
 import { PinIcon } from '../../../icons/pin-icon';
 import { HistoryIcon } from '../../../icons/history-icon';
+import { Auth } from '../../auth/ui/Auth';
 import './main-header.styles.css';
 
 interface MainHeaderProps {
@@ -57,6 +58,7 @@ export const MainHeader = ({
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [showResults, setShowResults] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [authOpen, setAuthOpen] = useState(false);
 	const [legendVisible, setLegendVisible] = useState(true);
 	const dropdownRef = useRef<HTMLFormElement>(null);
 
@@ -138,13 +140,13 @@ export const MainHeader = ({
 						autoComplete='off'
 					/>
 					{searchQuery && (
-						<Button mod='circle cross' onClick={clearInput}></Button>
+						<Button mod='circle clear cross' onClick={clearInput}></Button>
 					)}
 				</div>
 
 				<Button
 					type='submit'
-					mod='circle icon search'
+					mod='circle clear icon search'
 					disabled={searchLoading}
 					aria-label='Найти'
 				>
@@ -236,6 +238,7 @@ export const MainHeader = ({
 						</div>
 					)}
 			</form>
+			<Auth open={authOpen} onToggle={() => setAuthOpen((p) => !p)} />
 			{routeError && (
 				<div className='route-error' role='alert'>
 					<span>{routeError}</span>

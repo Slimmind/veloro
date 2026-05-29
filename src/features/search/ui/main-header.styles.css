@@ -16,17 +16,23 @@
 
 .search-form {
   position: relative;
-  width: 100%;
+  flex: 1;
   display: flex;
   gap: 8px;
 }
 
 .search-form input {
   width: 100%;
-  padding-right: 50px;
+  padding-right: 90px;
 }
 
 .search-form .btn--cross {
+  position: absolute;
+  top: 0;
+  right: 40px;
+}
+
+.search-form .btn--search {
   position: absolute;
   top: 0;
   right: 0;
