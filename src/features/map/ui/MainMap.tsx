@@ -44,9 +44,12 @@ interface MainMapProps {
 	activeStyle: MapStyleKey;
 	geolocation: UseGeolocationReturn;
 	route: RouteResult | null;
+	waypoints?: LatLngTuple[];
 	pickingPoint?: boolean;
 	routeFromPoint?: LatLngTuple | null;
 	onMapClick?: (latlng: LatLngTuple) => void;
+	onClearRoute?: () => void;
+	onUndoWaypoint?: () => void;
 }
 
 const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom?: number) => Promise<string | null> }) => {
@@ -75,9 +78,12 @@ export const MainMap = ({
 	activeStyle,
 	geolocation,
 	route,
+	waypoints = [],
 	pickingPoint = false,
 	routeFromPoint = null,
 	onMapClick,
+	onClearRoute,
+	onUndoWaypoint,
 }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
@@ -109,7 +115,14 @@ export const MainMap = ({
 	return (
 		<div className={`main-map ${pickingPoint ? 'main-map--picking' : ''}`}>
 			{route && (
-				<RouteInfo distance={route.distance} duration={route.duration} traveled={routeTraveled} />
+				<RouteInfo
+					distance={route.distance}
+					duration={route.duration}
+					traveled={routeTraveled}
+					hasWaypoints={waypoints.length > 0}
+					onUndo={onUndoWaypoint}
+					onClear={onClearRoute}
+				/>
 			)}
 			<MapContainer
 				center={[53.9, 27.56] as LatLngTuple}
@@ -145,6 +158,12 @@ export const MainMap = ({
 						<Popup>Начало маршрута</Popup>
 					</Marker>
 				)}
+
+				{waypoints.map((wp, i) => (
+					<Marker key={`wp-${i}`} position={wp} icon={markerIcon}>
+						<Popup>Точка пути {i + 1}</Popup>
+					</Marker>
+				))}
 
 			</MapContainer>
 		</div>

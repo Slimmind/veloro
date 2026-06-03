@@ -17,6 +17,7 @@
   font-size: 0.9rem;
   font-weight: 500;
   pointer-events: none;
+  /* buttons inside override this */
   animation: slideUp 0.2s ease;
 }
 
@@ -29,4 +30,23 @@
   height: 16px;
   background-color: rgba(255, 255, 255, 0.35);
   border-radius: 1px;
+}
+
+.route-info__btn {
+  pointer-events: auto;
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  opacity: 0.8;
+  border-radius: 6px;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.route-info__btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
 }

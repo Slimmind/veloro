@@ -1,13 +1,14 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { RouteIcon } from '../../../icons/route-icon';
-import './path-builder.styles.css';
 import { PointToPointIcon } from '../../../icons/point-to-point';
 import { CurrentToPoint } from '../../../icons/current-to-point';
+import { PinIcon } from '../../../icons/pin-icon';
+import './path-builder.styles.css';
 
-export type RouteMode = 'from-me' | 'point-to-point';
+export type RouteMode = 'from-me' | 'point-to-point' | 'add-waypoint';
 
-const ROUTE_MODES: { mode: RouteMode; label: string; description: string; icon: ReactNode }[] = [
+const ROUTE_MODES: { mode: RouteMode; label: string; description: string; icon: ReactNode; requiresRoute?: boolean }[] = [
 	{
 		mode: 'from-me',
 		label: 'От моего местоположения',
@@ -20,15 +21,23 @@ const ROUTE_MODES: { mode: RouteMode; label: string; description: string; icon: 
 		description: 'Укажите точку начала, затем точку конца маршрута',
 		icon: <PointToPointIcon />,
 	},
+	{
+		mode: 'add-waypoint',
+		label: 'Добавить точку пути',
+		description: 'Укажите промежуточную точку на карте',
+		icon: <PinIcon />,
+		requiresRoute: true,
+	},
 ];
 
 interface PathBuilderProps {
 	open: boolean;
 	onToggle: () => void;
 	onModeSelect: (mode: RouteMode) => void;
+	hasRoute?: boolean;
 }
 
-export const PathBuilder = ({ open, onToggle, onModeSelect }: PathBuilderProps) => {
+export const PathBuilder = ({ open, onToggle, onModeSelect, hasRoute = false }: PathBuilderProps) => {
 	const rootRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -47,6 +56,8 @@ export const PathBuilder = ({ open, onToggle, onModeSelect }: PathBuilderProps) 
 		onToggle();
 	};
 
+	const visibleModes = ROUTE_MODES.filter(({ requiresRoute }) => !requiresRoute || hasRoute);
+
 	return (
 		<div className='path-builder-root' ref={rootRef}>
 			<Button mod='circle icon' onClick={onToggle} aria-label='Построить маршрут'>
@@ -55,7 +66,7 @@ export const PathBuilder = ({ open, onToggle, onModeSelect }: PathBuilderProps) 
 			<div className={`path-builder ${open ? '' : 'hidden'}`}>
 				<h5 className='path-builder__title'>Построение маршрута</h5>
 				<ul className='path-builder__list'>
-					{ROUTE_MODES.map(({ mode, label, description, icon }) => (
+					{visibleModes.map(({ mode, label, description, icon }) => (
 						<li key={mode}>
 							<button
 								className='path-builder__option'

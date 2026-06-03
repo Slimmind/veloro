@@ -16,7 +16,7 @@ export const App = () => {
 	const [routeFromPoint, setRouteFromPoint] = useState<LatLngTuple | null>(null);
 
 	const geolocation = useUserGeolocation();
-	const { route, buildRoute, error: routeError, clearRoute } = useRoute();
+	const { route, waypoints, buildRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
 	const { results, loading, error, search } = useMapSearch();
 	const { history: routeHistory, addToHistory } = useRouteHistory();
 
@@ -73,9 +73,12 @@ export const App = () => {
 					setRouteFromPoint(null);
 					setRouteMode(null);
 				}
+			} else if (routeMode === 'add-waypoint') {
+				addWaypoint(latlng);
+				setRouteMode(null);
 			}
 		},
-		[routeMode, routeFromPoint, geolocation, buildRoute],
+		[routeMode, routeFromPoint, geolocation, buildRoute, addWaypoint],
 	);
 
 	return (
@@ -97,14 +100,18 @@ export const App = () => {
 				open={pathBuilderOpen}
 				onToggle={() => setPathBuilderOpen((p) => !p)}
 				onModeSelect={handleModeSelect}
+				hasRoute={route !== null}
 			/>
 			<MainMap
 				activeStyle={activeStyle}
 				geolocation={geolocation}
 				route={route}
+				waypoints={waypoints}
 				pickingPoint={routeMode !== null}
 				routeFromPoint={routeFromPoint}
 				onMapClick={handleMapClick}
+				onClearRoute={clearRoute}
+				onUndoWaypoint={undoWaypoint}
 			/>
 		</div>
 	);

@@ -12,9 +12,9 @@ const BASE_URL = 'https://api.openrouteservice.org/v2/directions/cycling-regular
 export async function fetchRoute(
 	from: LatLngTuple,
 	to: LatLngTuple,
+	waypoints: LatLngTuple[] = [],
 ): Promise<RouteResult> {
-	const [fromLat, fromLng] = from;
-	const [toLat, toLng] = to;
+	const toCoord = ([lat, lng]: LatLngTuple) => [lng, lat];
 
 	const res = await fetch(BASE_URL, {
 		method: 'POST',
@@ -23,10 +23,7 @@ export async function fetchRoute(
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify({
-			coordinates: [
-				[fromLng, fromLat],
-				[toLng, toLat],
-			],
+			coordinates: [from, ...waypoints, to].map(toCoord),
 		}),
 	});
 
@@ -34,7 +31,7 @@ export async function fetchRoute(
 		const json = await res.json().catch(() => null);
 		const orsMessage = json?.error?.message as string | undefined;
 		if (orsMessage?.toLowerCase().includes('routable point')) {
-			throw new Error('Не удалось построить маршрут: точка назначения недостижима (возможно, это водоём или закрытая территория). Попробуйте построить маршрут к точке на карте от вашего текущего метоположения.');
+			throw new Error('Не удалось построить маршрут: точка назначения недостижима (возможно, это водоём или закрытая территория). Попробуйте построить маршрут к точке на карте от вашего текущего местоположения.');
 		}
 		throw new Error(orsMessage ?? `Ошибка маршрутизации (${res.status})`);
 	}
