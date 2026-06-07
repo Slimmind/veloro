@@ -9,7 +9,7 @@
   position: absolute;
   bottom: 50px;
   right: 0;
-  min-width: 230px;
+  min-width: 280px;
   background: var(--color-white-transparent);
   backdrop-filter: blur(var(--blur));
   border: 1px solid var(--color-violet-transparent);
@@ -38,6 +38,7 @@
   gap: 2px;
   list-style: none;
   margin: 0;
+  padding: 0 10px 10px;
 }
 
 .path-builder__option {

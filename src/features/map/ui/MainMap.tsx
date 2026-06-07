@@ -50,6 +50,8 @@ interface MainMapProps {
 	onMapClick?: (latlng: LatLngTuple) => void;
 	onClearRoute?: () => void;
 	onUndoWaypoint?: () => void;
+	onSaveRoute?: () => void;
+	isSavedRoute?: boolean;
 }
 
 const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom?: number) => Promise<string | null> }) => {
@@ -84,6 +86,8 @@ export const MainMap = ({
 	onMapClick,
 	onClearRoute,
 	onUndoWaypoint,
+	onSaveRoute,
+	isSavedRoute,
 }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
@@ -120,6 +124,8 @@ export const MainMap = ({
 					duration={route.duration}
 					traveled={routeTraveled}
 					hasWaypoints={waypoints.length > 0}
+					onSave={onSaveRoute}
+					isSaved={isSavedRoute}
 					onUndo={onUndoWaypoint}
 					onClear={onClearRoute}
 				/>

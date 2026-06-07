@@ -160,6 +160,117 @@
   background-color: var(--color-violet-transparent);
 }
 
+.auth-menu__saved {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-menu__saved-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-violet-transparent);
+}
+
+.auth-menu__saved-back {
+  background: none;
+  border: none;
+  color: var(--color-violet);
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.auth-menu__saved-back:hover {
+  opacity: 1;
+  background: var(--color-violet-transparent);
+}
+
+.auth-menu__saved-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-violet);
+}
+
+.auth-menu__saved-list {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.auth-menu__saved-item {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-violet-transparent);
+}
+
+.auth-menu__saved-item:last-child {
+  border-bottom: none;
+}
+
+.auth-menu__saved-route {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  color: var(--color-violet);
+  font-size: 0.85rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.auth-menu__saved-route:hover {
+  background-color: var(--color-violet-transparent);
+}
+
+.auth-menu__saved-dist {
+  font-weight: 600;
+}
+
+.auth-menu__saved-dur {
+  opacity: 0.7;
+}
+
+.auth-menu__saved-date {
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.auth-menu__saved-delete {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--color-violet);
+  font-size: 0.85rem;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.auth-menu__saved-delete:hover {
+  opacity: 1;
+}
+
+.auth-menu__saved-empty {
+  padding: 20px 16px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-violet);
+  opacity: 0.5;
+  text-align: center;
+}
+
 @keyframes auth-slide-down {
   from { opacity: 0; transform: scale(0.9) translateY(-8px); }
   to   { opacity: 1; transform: scale(1)   translateY(0); }

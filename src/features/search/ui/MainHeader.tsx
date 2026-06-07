@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
 import type { MapStyleKey } from '../../map/model/map-styles';
 import type { SearchResult } from '../../../entities/search';
+import type { SavedRoute } from '../../map/model/useSavedRoutes';
 import { Button } from '../../../shared/ui/button';
 import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MainMenu } from './MainMenu';
@@ -22,6 +23,9 @@ interface MainHeaderProps {
 	activeStyle: MapStyleKey;
 	onStyleChange: (style: MapStyleKey) => void;
 	userPosition?: LatLngTuple | null;
+	savedRoutes?: SavedRoute[];
+	onDeleteSavedRoute?: (id: string) => void;
+	onSelectSavedRoute?: (from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[]) => void;
 }
 
 function haversineDistance(a: LatLngTuple, b: LatLngTuple): number {
@@ -54,6 +58,9 @@ export const MainHeader = ({
 	activeStyle,
 	onStyleChange,
 	userPosition = null,
+	savedRoutes = [],
+	onDeleteSavedRoute,
+	onSelectSavedRoute,
 }: MainHeaderProps) => {
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [showResults, setShowResults] = useState(false);
@@ -110,6 +117,9 @@ export const MainHeader = ({
 				onToggle={handleMenuToggle}
 				activeStyle={activeStyle}
 				onStyleChange={(style) => { onStyleChange(style); setMenuOpen(false); }}
+				savedRoutes={savedRoutes}
+				onDeleteSavedRoute={onDeleteSavedRoute}
+				onSelectSavedRoute={onSelectSavedRoute}
 			/>
 			{legendVisible && !menuOpen && (
 				<div className='bike-legend-panel'>

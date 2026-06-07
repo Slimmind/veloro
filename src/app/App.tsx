@@ -7,6 +7,8 @@ import { useRoute } from '../features/map/model/useRoute';
 import { DEFAULT_MAP_STYLE } from '../features/map/model/map-styles';
 import type { MapStyleKey } from '../features/map/model/map-styles';
 import { useUserGeolocation } from '../hooks/useUserGeolocation';
+import { useAuth } from '../features/auth/model/useAuth';
+import { useSavedRoutes } from '../features/map/model/useSavedRoutes';
 
 export const App = () => {
 	const [activeStyle, setActiveStyle] = useState<MapStyleKey>(DEFAULT_MAP_STYLE);
@@ -14,11 +16,14 @@ export const App = () => {
 	const [pathBuilderOpen, setPathBuilderOpen] = useState(false);
 	const [routeMode, setRouteMode] = useState<RouteMode | null>(null);
 	const [routeFromPoint, setRouteFromPoint] = useState<LatLngTuple | null>(null);
+	const [isCurrentRouteSaved, setIsCurrentRouteSaved] = useState(false);
 
 	const geolocation = useUserGeolocation();
-	const { route, waypoints, buildRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
+	const { route, waypoints, routeFrom, routeTo, buildRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
 	const { results, loading, error, search } = useMapSearch();
 	const { history: routeHistory, addToHistory } = useRouteHistory();
+	const { user, authLoading } = useAuth();
+	const { savedRoutes, saveRoute, deleteRoute } = useSavedRoutes(authLoading ? undefined : (user?.uid ?? null));
 
 	// Build pending route once geolocation becomes available
 	useEffect(() => {
@@ -37,6 +42,7 @@ export const App = () => {
 
 	const handleDirectionClick = useCallback(
 		(result: SearchResult) => {
+			setIsCurrentRouteSaved(false);
 			addToHistory(result);
 			if (geolocation.position) {
 				buildRoute(geolocation.position, result.position);
@@ -58,6 +64,7 @@ export const App = () => {
 			if (!routeMode) return;
 
 			if (routeMode === 'from-me') {
+				setIsCurrentRouteSaved(false);
 				if (geolocation.position) {
 					buildRoute(geolocation.position, latlng);
 				} else {
@@ -69,16 +76,32 @@ export const App = () => {
 				if (!routeFromPoint) {
 					setRouteFromPoint(latlng);
 				} else {
+					setIsCurrentRouteSaved(false);
 					buildRoute(routeFromPoint, latlng);
 					setRouteFromPoint(null);
 					setRouteMode(null);
 				}
 			} else if (routeMode === 'add-waypoint') {
+				setIsCurrentRouteSaved(false);
 				addWaypoint(latlng);
 				setRouteMode(null);
 			}
 		},
 		[routeMode, routeFromPoint, geolocation, buildRoute, addWaypoint],
+	);
+
+	const handleSaveRoute = useCallback(() => {
+		if (route && routeFrom && routeTo) {
+			saveRoute(route, routeFrom, routeTo, waypoints);
+		}
+	}, [route, routeFrom, routeTo, waypoints, saveRoute]);
+
+	const handleSelectSavedRoute = useCallback(
+		(from: LatLngTuple, to: LatLngTuple, wps: LatLngTuple[]) => {
+			setIsCurrentRouteSaved(true);
+			buildRoute(from, to, wps);
+		},
+		[buildRoute],
 	);
 
 	return (
@@ -90,11 +113,14 @@ export const App = () => {
 				searchResults={results}
 				searchError={error}
 				routeError={routeError}
-				onRouteDismiss={clearRoute}
+				onRouteDismiss={() => { clearRoute(); setIsCurrentRouteSaved(false); }}
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
 				userPosition={geolocation.position}
 				routeHistory={routeHistory}
+				savedRoutes={savedRoutes}
+				onDeleteSavedRoute={deleteRoute}
+				onSelectSavedRoute={handleSelectSavedRoute}
 			/>
 			<PathBuilder
 				open={pathBuilderOpen}
@@ -110,8 +136,10 @@ export const App = () => {
 				pickingPoint={routeMode !== null}
 				routeFromPoint={routeFromPoint}
 				onMapClick={handleMapClick}
-				onClearRoute={clearRoute}
+				onClearRoute={() => { clearRoute(); setIsCurrentRouteSaved(false); }}
 				onUndoWaypoint={undoWaypoint}
+				onSaveRoute={user ? handleSaveRoute : undefined}
+				isSavedRoute={isCurrentRouteSaved}
 			/>
 		</div>
 	);

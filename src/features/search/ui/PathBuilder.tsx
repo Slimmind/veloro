@@ -3,32 +3,38 @@ import { Button } from '../../../shared/ui/button';
 import { RouteIcon } from '../../../icons/route-icon';
 import { PointToPointIcon } from '../../../icons/point-to-point';
 import { CurrentToPoint } from '../../../icons/current-to-point';
-import { PinIcon } from '../../../icons/pin-icon';
+import { AddLocationIcon } from '../../../icons/add-location-icon';
 import './path-builder.styles.css';
 
 export type RouteMode = 'from-me' | 'point-to-point' | 'add-waypoint';
 
-const ROUTE_MODES: { mode: RouteMode; label: string; description: string; icon: ReactNode; requiresRoute?: boolean }[] = [
-	{
-		mode: 'from-me',
-		label: 'От моего местоположения',
-		description: 'Укажите точку назначения на карте',
-		icon: <CurrentToPoint />,
-	},
-	{
-		mode: 'point-to-point',
-		label: 'От точки до точки',
-		description: 'Укажите точку начала, затем точку конца маршрута',
-		icon: <PointToPointIcon />,
-	},
-	{
-		mode: 'add-waypoint',
-		label: 'Добавить точку пути',
-		description: 'Укажите промежуточную точку на карте',
-		icon: <PinIcon />,
-		requiresRoute: true,
-	},
-];
+const ROUTE_MODES: {
+	mode: RouteMode;
+	label: string;
+	description: string;
+	icon: ReactNode;
+	requiresRoute?: boolean;
+}[] = [
+		{
+			mode: 'from-me',
+			label: 'От моего местоположения',
+			description: 'Укажите точку назначения на карте',
+			icon: <CurrentToPoint />,
+		},
+		{
+			mode: 'point-to-point',
+			label: 'От точки до точки',
+			description: 'Укажите точку начала, затем точку конца маршрута',
+			icon: <PointToPointIcon />,
+		},
+		{
+			mode: 'add-waypoint',
+			label: 'Добавить точку пути',
+			description: 'Укажите промежуточную точку на карте',
+			icon: <AddLocationIcon size='36' />,
+			requiresRoute: true,
+		},
+	];
 
 interface PathBuilderProps {
 	open: boolean;

@@ -66,7 +66,13 @@ export const fetchBikePathsOverpass = async (
     [out:json][timeout:25];
     (
       way["highway"="cycleway"](${overpassBbox});
-      way["cycleway"~"lane|track|opposite_lane"](${overpassBbox});
+      way["highway"="path"]["bicycle"="designated"](${overpassBbox});
+      way["highway"="footway"]["bicycle"="designated"](${overpassBbox});
+      way["bicycle_road"="yes"](${overpassBbox});
+      way["cycleway"~"lane|track|opposite_lane|opposite_track|shared_lane"](${overpassBbox});
+      way["cycleway:left"~"lane|track"](${overpassBbox});
+      way["cycleway:right"~"lane|track"](${overpassBbox});
+      way["cycleway:both"~"lane|track"](${overpassBbox});
       way["route"="bicycle"](${overpassBbox});
     );
     out geom;
@@ -102,9 +108,20 @@ export const fetchBikePathsOverpass = async (
 				const cycleway = el.tags.cycleway;
 				const route = el.tags.route;
 
+				const cyclewayLeft = el.tags['cycleway:left'];
+				const cyclewayRight = el.tags['cycleway:right'];
+				const cyclewayBoth = el.tags['cycleway:both'];
+				const bicycleRoad = el.tags['bicycle_road'];
+				const bicycle = el.tags.bicycle;
+
 				let type: PathStyleKey = 'shared';
 				if (highway === 'cycleway') type = 'cycleway';
-				else if (cycleway === 'lane' || cycleway?.includes('lane')) type = 'lane';
+				else if (bicycle === 'designated') type = 'cycleway';
+				else if (bicycleRoad === 'yes') type = 'cycleway';
+				else if (cycleway === 'track' || cycleway === 'opposite_track') type = 'cycleway';
+				else if (cycleway === 'lane' || cycleway === 'opposite_lane' || cycleway === 'shared_lane') type = 'lane';
+				else if (cyclewayLeft === 'track' || cyclewayRight === 'track' || cyclewayBoth === 'track') type = 'cycleway';
+				else if (cyclewayLeft === 'lane' || cyclewayRight === 'lane' || cyclewayBoth === 'lane') type = 'lane';
 				else if (route === 'bicycle') type = 'track';
 
 				return {

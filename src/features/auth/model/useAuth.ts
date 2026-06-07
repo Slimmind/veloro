@@ -17,9 +17,13 @@ const googleProvider = new GoogleAuthProvider();
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, setUser);
+    return onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setAuthLoading(false);
+    });
   }, []);
 
   const signInWithEmail = (email: string, password: string) =>
@@ -36,5 +40,5 @@ export const useAuth = () => {
 
   const signOut = () => firebaseSignOut(auth);
 
-  return { user, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut };
+  return { user, authLoading, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut };
 };

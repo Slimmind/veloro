@@ -8,9 +8,11 @@ export type { RouteResult };
 export interface UseRouteReturn {
 	route: RouteResult | null;
 	waypoints: LatLngTuple[];
+	routeFrom: LatLngTuple | null;
+	routeTo: LatLngTuple | null;
 	loading: boolean;
 	error: string | null;
-	buildRoute: (from: LatLngTuple, to: LatLngTuple) => Promise<void>;
+	buildRoute: (from: LatLngTuple, to: LatLngTuple, waypoints?: LatLngTuple[]) => Promise<void>;
 	addWaypoint: (point: LatLngTuple) => Promise<void>;
 	undoWaypoint: () => Promise<void>;
 	clearRoute: () => void;
@@ -32,6 +34,7 @@ export const useRoute = (): UseRouteReturn => {
 			setRoute(result);
 			setRouteFrom(from);
 			setRouteTo(to);
+			setWaypoints(wps);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : 'Не удалось построить маршрут');
 		} finally {
@@ -61,5 +64,5 @@ export const useRoute = (): UseRouteReturn => {
 		setError(null);
 	}, []);
 
-	return { route, waypoints, loading, error, buildRoute, addWaypoint, undoWaypoint, clearRoute };
+	return { route, waypoints, routeFrom, routeTo, loading, error, buildRoute, addWaypoint, undoWaypoint, clearRoute };
 };

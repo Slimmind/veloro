@@ -44,7 +44,7 @@
   top: 100%;
   left: -50px;
   right: 0;
-  width: calc(100% + 50px);
+  width: calc(100% + 100px);
   margin-top: 8px;
   background: var(--color-white-transparent);
   backdrop-filter: blur(var(--blur));
