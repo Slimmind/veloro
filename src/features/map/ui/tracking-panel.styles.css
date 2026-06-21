@@ -54,17 +54,17 @@
 }
 
 .tracking-panel__time {
-	font-size: 24px;
-	font-weight: 700;
 	color: var(--color-violet);
 	font-variant-numeric: tabular-nums;
+	font-size: 13px;
 	line-height: 1;
+	opacity: 0.65;
 }
 
 .tracking-panel__distance {
-	font-size: 13px;
+	font-size: 24px;
+	font-weight: 700;
 	color: var(--color-violet);
-	opacity: 0.65;
 }
 
 .tracking-panel__controls {
@@ -76,7 +76,6 @@
 .tracking-panel__btn {
 	flex: 1;
 	padding: 5px 10px;
-	border-radius: 0.5rem;
 	border: 1px solid var(--color-violet-transparent);
 	background: var(--color-violet-transparent);
 	color: var(--color-violet);

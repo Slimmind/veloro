@@ -56,17 +56,17 @@ export const TrackingPanel = ({
 				{status !== 'stopped' ? (
 					<>
 						{status === 'recording' ? (
-							<button type='button' className='tracking-panel__btn' onClick={onPause}>
+							<button type='button' className='btn tracking-panel__btn' onClick={onPause}>
 								Пауза
 							</button>
 						) : (
-							<button type='button' className='tracking-panel__btn' onClick={onResume}>
+							<button type='button' className='btn tracking-panel__btn' onClick={onResume}>
 								Продолжить
 							</button>
 						)}
 						<button
 							type='button'
-							className='tracking-panel__btn tracking-panel__btn--stop'
+							className='btn tracking-panel__btn tracking-panel__btn--stop'
 							onClick={onStop}
 						>
 							Стоп
@@ -76,7 +76,7 @@ export const TrackingPanel = ({
 					<>
 						<button
 							type='button'
-							className='tracking-panel__btn tracking-panel__btn--icon'
+							className='btn tracking-panel__btn tracking-panel__btn--icon'
 							onClick={onClear}
 							aria-label='Удалить запись'
 							title='Удалить запись'
@@ -86,7 +86,7 @@ export const TrackingPanel = ({
 						{onSave && (
 							<button
 								type='button'
-								className='tracking-panel__btn tracking-panel__btn--icon'
+								className='btn tracking-panel__btn tracking-panel__btn--icon'
 								onClick={onSave}
 								aria-label='Сохранить трек'
 								title='Сохранить трек'

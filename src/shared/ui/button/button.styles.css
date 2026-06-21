@@ -5,7 +5,7 @@
   background-color: var(--color-violet-transparent);
   backdrop-filter: blur(var(--blur));
   border: 0;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: var(--shadow);
   color: var(--color-violet);
   cursor: pointer;
