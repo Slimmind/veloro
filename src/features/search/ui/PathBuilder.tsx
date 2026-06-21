@@ -4,9 +4,10 @@ import { RouteIcon } from '../../../icons/route-icon';
 import { PointToPointIcon } from '../../../icons/point-to-point';
 import { CurrentToPoint } from '../../../icons/current-to-point';
 import { AddLocationIcon } from '../../../icons/add-location-icon';
+import { RecordIcon } from '../../../icons/record-icon';
 import './path-builder.styles.css';
 
-export type RouteMode = 'from-me' | 'point-to-point' | 'add-waypoint';
+export type RouteMode = 'from-me' | 'point-to-point' | 'add-waypoint' | 'record-track';
 
 const ROUTE_MODES: {
 	mode: RouteMode;
@@ -33,6 +34,12 @@ const ROUTE_MODES: {
 			description: 'Укажите промежуточную точку на карте',
 			icon: <AddLocationIcon size='36' />,
 			requiresRoute: true,
+		},
+		{
+			mode: 'record-track',
+			label: 'Запись маршрута',
+			description: 'Отслеживайте свой путь в реальном времени',
+			icon: <RecordIcon size='28' />,
 		},
 	];
 

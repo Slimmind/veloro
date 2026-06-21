@@ -4,6 +4,8 @@ import { MainHeader, PathBuilder, useMapSearch, useRouteHistory, type SearchResu
 import type { RouteMode } from '../features/search';
 import { MainMap } from '../features/map';
 import { useRoute } from '../features/map/model/useRoute';
+import { useTrackRecording } from '../features/map/model/useTrackRecording';
+import { TrackingPanel } from '../features/map/ui/TrackingPanel';
 import { DEFAULT_MAP_STYLE } from '../features/map/model/map-styles';
 import type { MapStyleKey } from '../features/map/model/map-styles';
 import { useUserGeolocation } from '../hooks/useUserGeolocation';
@@ -20,6 +22,7 @@ export const App = () => {
 
 	const geolocation = useUserGeolocation();
 	const { route, waypoints, routeFrom, routeTo, buildRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
+	const tracking = useTrackRecording(geolocation.position);
 	const { results, loading, error, search } = useMapSearch();
 	const { history: routeHistory, addToHistory } = useRouteHistory();
 	const { user, authLoading } = useAuth();
@@ -55,9 +58,13 @@ export const App = () => {
 	);
 
 	const handleModeSelect = useCallback((mode: RouteMode) => {
+		if (mode === 'record-track') {
+			tracking.start();
+			return;
+		}
 		setRouteMode(mode);
 		setRouteFromPoint(null);
-	}, []);
+	}, [tracking.start]);
 
 	const handleMapClick = useCallback(
 		(latlng: LatLngTuple) => {
@@ -96,6 +103,19 @@ export const App = () => {
 		}
 	}, [route, routeFrom, routeTo, waypoints, saveRoute]);
 
+	const handleSaveTrack = useCallback(() => {
+		const { trackPoints, distance, elapsed } = tracking;
+		if (trackPoints.length >= 2) {
+			saveRoute(
+				{ coordinates: trackPoints, distance, duration: elapsed },
+				trackPoints[0],
+				trackPoints[trackPoints.length - 1],
+				[],
+			);
+		}
+		tracking.clear();
+	}, [tracking, saveRoute]);
+
 	const handleSelectSavedRoute = useCallback(
 		(from: LatLngTuple, to: LatLngTuple, wps: LatLngTuple[]) => {
 			setIsCurrentRouteSaved(true);
@@ -128,6 +148,16 @@ export const App = () => {
 				onModeSelect={handleModeSelect}
 				hasRoute={route !== null}
 			/>
+			<TrackingPanel
+				status={tracking.status}
+				elapsed={tracking.elapsed}
+				distance={tracking.distance}
+				onPause={tracking.pause}
+				onResume={tracking.resume}
+				onStop={tracking.stop}
+				onClear={tracking.clear}
+				onSave={user ? handleSaveTrack : undefined}
+			/>
 			<MainMap
 				activeStyle={activeStyle}
 				geolocation={geolocation}
@@ -140,6 +170,7 @@ export const App = () => {
 				onUndoWaypoint={undoWaypoint}
 				onSaveRoute={user ? handleSaveRoute : undefined}
 				isSavedRoute={isCurrentRouteSaved}
+				trackPoints={tracking.trackPoints}
 			/>
 		</div>
 	);

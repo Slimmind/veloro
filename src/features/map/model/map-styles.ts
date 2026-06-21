@@ -2,17 +2,22 @@ export const MAP_STYLES = {
 	liberty: {
 		type: 'vector' as const,
 		url: 'https://tiles.openfreemap.org/styles/liberty',
-		label: 'Liberty',
+		label: 'Детализированная',
 	},
 	bright: {
 		type: 'vector' as const,
 		url: 'https://tiles.openfreemap.org/styles/bright',
-		label: 'Bright',
+		label: 'Светлая',
+	},
+	positron: {
+		type: 'vector' as const,
+		url: 'https://tiles.openfreemap.org/styles/positron',
+		label: 'Монохром',
 	},
 	satellite: {
 		type: 'satellite' as const,
 		url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-		label: 'Satellite',
+		label: 'Спутник',
 	},
 } as const;
 

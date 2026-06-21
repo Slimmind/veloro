@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
 	MapContainer,
 	Marker,
+	Polyline,
 	Popup,
 	ZoomControl,
 	useMap,
@@ -52,6 +53,7 @@ interface MainMapProps {
 	onUndoWaypoint?: () => void;
 	onSaveRoute?: () => void;
 	isSavedRoute?: boolean;
+	trackPoints?: LatLngTuple[];
 }
 
 const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom?: number) => Promise<string | null> }) => {
@@ -88,6 +90,7 @@ export const MainMap = ({
 	onUndoWaypoint,
 	onSaveRoute,
 	isSavedRoute,
+	trackPoints = [],
 }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
 	const [mlMap, setMlMap] = useState<MLMap | null>(null);
@@ -156,6 +159,10 @@ export const MainMap = ({
 				<UserLocation position={position} accuracy={accuracy} icon={markerIcon} />
 
 				{route && <RouteLine coordinates={route.coordinates} userPosition={position} />}
+
+				{trackPoints.length >= 2 && (
+					<Polyline positions={trackPoints} color='#22c55e' weight={5} opacity={0.85} />
+				)}
 
 				{onMapClick && <MapClickHandler onClick={onMapClick} />}
 
