@@ -19,11 +19,28 @@ export function useTrackRecording(currentPosition: LatLngTuple | null) {
 	const [elapsed, setElapsed] = useState(0);
 	const [trackPoints, setTrackPoints] = useState<LatLngTuple[]>([]);
 	const lastPosRef = useRef<LatLngTuple | null>(null);
+	// Wall-clock timestamp of the current recording segment start (null when paused/stopped)
+	const startedAtRef = useRef<number | null>(null);
+	// Milliseconds accumulated in previous segments (before pauses)
+	const accumulatedRef = useRef<number>(0);
 
 	useEffect(() => {
 		if (status !== 'recording') return;
-		const id = setInterval(() => setElapsed((e) => e + 1), 1000);
-		return () => clearInterval(id);
+
+		const update = () => {
+			if (startedAtRef.current !== null) {
+				setElapsed(Math.floor((accumulatedRef.current + (Date.now() - startedAtRef.current)) / 1000));
+			}
+		};
+
+		const id = setInterval(update, 1000);
+		// Catch up immediately when the user returns after screen lock / app switch
+		document.addEventListener('visibilitychange', update);
+
+		return () => {
+			clearInterval(id);
+			document.removeEventListener('visibilitychange', update);
+		};
 	}, [status]);
 
 	useEffect(() => {
@@ -44,20 +61,43 @@ export function useTrackRecording(currentPosition: LatLngTuple | null) {
 
 	const start = useCallback(() => {
 		lastPosRef.current = null;
+		startedAtRef.current = Date.now();
+		accumulatedRef.current = 0;
 		setStatus('recording');
 		setElapsed(0);
 		setTrackPoints([]);
 	}, []);
 
-	const pause = useCallback(() => setStatus('paused'), []);
-	const resume = useCallback(() => setStatus('recording'), []);
-	const stop = useCallback(() => setStatus('stopped'), []);
+	const pause = useCallback(() => {
+		if (startedAtRef.current !== null) {
+			accumulatedRef.current += Date.now() - startedAtRef.current;
+			startedAtRef.current = null;
+		}
+		setStatus('paused');
+	}, []);
+
+	const resume = useCallback(() => {
+		startedAtRef.current = Date.now();
+		setStatus('recording');
+	}, []);
+
+	const stop = useCallback(() => {
+		if (startedAtRef.current !== null) {
+			const totalMs = accumulatedRef.current + (Date.now() - startedAtRef.current);
+			accumulatedRef.current = totalMs;
+			startedAtRef.current = null;
+			setElapsed(Math.floor(totalMs / 1000));
+		}
+		setStatus('stopped');
+	}, []);
 
 	const clear = useCallback(() => {
+		startedAtRef.current = null;
+		accumulatedRef.current = 0;
+		lastPosRef.current = null;
 		setStatus('idle');
 		setTrackPoints([]);
 		setElapsed(0);
-		lastPosRef.current = null;
 	}, []);
 
 	return { status, elapsed, distance, trackPoints, start, pause, resume, stop, clear };

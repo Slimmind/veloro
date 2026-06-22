@@ -25,7 +25,7 @@ interface MainHeaderProps {
 	userPosition?: LatLngTuple | null;
 	savedRoutes?: SavedRoute[];
 	onDeleteSavedRoute?: (id: string) => void;
-	onSelectSavedRoute?: (from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[]) => void;
+	onSelectSavedRoute?: (route: SavedRoute) => void;
 }
 
 function haversineDistance(a: LatLngTuple, b: LatLngTuple): number {

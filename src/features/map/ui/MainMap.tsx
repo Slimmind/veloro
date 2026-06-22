@@ -53,6 +53,7 @@ interface MainMapProps {
 	onUndoWaypoint?: () => void;
 	onSaveRoute?: () => void;
 	isSavedRoute?: boolean;
+	isRecordedRoute?: boolean;
 	trackPoints?: LatLngTuple[];
 }
 
@@ -90,6 +91,7 @@ export const MainMap = ({
 	onUndoWaypoint,
 	onSaveRoute,
 	isSavedRoute,
+	isRecordedRoute = false,
 	trackPoints = [],
 }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
@@ -112,12 +114,15 @@ export const MainMap = ({
 		removeLatinLabels(mlMap);
 	}, [mlMap]);
 
-	const routeTraveled = route && position
+	const routeTraveled = route && !isRecordedRoute && position
 		? (() => {
 			const idx = findClosestIndex(route.coordinates, position);
 			return idx > 0 ? traveledDistance(route.coordinates, idx) : 0;
 		})()
 		: 0;
+
+	// For recorded tracks use the route coordinates as the display polyline
+	const displayTrackPoints = isRecordedRoute && route ? route.coordinates : trackPoints;
 
 	return (
 		<div className={`main-map ${pickingPoint ? 'main-map--picking' : ''}`}>
@@ -158,10 +163,10 @@ export const MainMap = ({
 				<MapBoundsTracker onBoundsChange={setMapBounds} />
 				<UserLocation position={position} accuracy={accuracy} icon={markerIcon} />
 
-				{route && <RouteLine coordinates={route.coordinates} userPosition={position} />}
+				{route && !isRecordedRoute && <RouteLine coordinates={route.coordinates} userPosition={position} />}
 
-				{trackPoints.length >= 2 && (
-					<Polyline positions={trackPoints} color='#22c55e' weight={5} opacity={0.85} />
+				{displayTrackPoints.length >= 2 && (
+					<Polyline positions={displayTrackPoints} color='#22c55e' weight={5} opacity={0.85} />
 				)}
 
 				{onMapClick && <MapClickHandler onClick={onMapClick} />}

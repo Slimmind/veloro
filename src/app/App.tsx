@@ -21,7 +21,8 @@ export const App = () => {
 	const [isCurrentRouteSaved, setIsCurrentRouteSaved] = useState(false);
 
 	const geolocation = useUserGeolocation();
-	const { route, waypoints, routeFrom, routeTo, buildRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
+	const { route, waypoints, routeFrom, routeTo, buildRoute, restoreRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
+	const [isRecordedRoute, setIsRecordedRoute] = useState(false);
 	const tracking = useTrackRecording(geolocation.position);
 	const { results, loading, error, search } = useMapSearch();
 	const { history: routeHistory, addToHistory } = useRouteHistory();
@@ -46,6 +47,7 @@ export const App = () => {
 	const handleDirectionClick = useCallback(
 		(result: SearchResult) => {
 			setIsCurrentRouteSaved(false);
+			setIsRecordedRoute(false);
 			addToHistory(result);
 			if (geolocation.position) {
 				buildRoute(geolocation.position, result.position);
@@ -72,6 +74,7 @@ export const App = () => {
 
 			if (routeMode === 'from-me') {
 				setIsCurrentRouteSaved(false);
+				setIsRecordedRoute(false);
 				if (geolocation.position) {
 					buildRoute(geolocation.position, latlng);
 				} else {
@@ -84,6 +87,7 @@ export const App = () => {
 					setRouteFromPoint(latlng);
 				} else {
 					setIsCurrentRouteSaved(false);
+					setIsRecordedRoute(false);
 					buildRoute(routeFromPoint, latlng);
 					setRouteFromPoint(null);
 					setRouteMode(null);
@@ -111,17 +115,28 @@ export const App = () => {
 				trackPoints[0],
 				trackPoints[trackPoints.length - 1],
 				[],
+				true,
 			);
 		}
 		tracking.clear();
 	}, [tracking, saveRoute]);
 
 	const handleSelectSavedRoute = useCallback(
-		(from: LatLngTuple, to: LatLngTuple, wps: LatLngTuple[]) => {
+		(savedRoute: import('../features/map/model/useSavedRoutes').SavedRoute) => {
 			setIsCurrentRouteSaved(true);
-			buildRoute(from, to, wps);
+			if (savedRoute.isRecorded) {
+				setIsRecordedRoute(true);
+				restoreRoute({
+					coordinates: savedRoute.coordinates,
+					distance: savedRoute.distance,
+					duration: savedRoute.duration,
+				});
+			} else {
+				setIsRecordedRoute(false);
+				buildRoute(savedRoute.from, savedRoute.to, savedRoute.waypoints);
+			}
 		},
-		[buildRoute],
+		[buildRoute, restoreRoute],
 	);
 
 	return (
@@ -133,7 +148,7 @@ export const App = () => {
 				searchResults={results}
 				searchError={error}
 				routeError={routeError}
-				onRouteDismiss={() => { clearRoute(); setIsCurrentRouteSaved(false); }}
+				onRouteDismiss={() => { clearRoute(); setIsCurrentRouteSaved(false); setIsRecordedRoute(false); }}
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
 				userPosition={geolocation.position}
@@ -166,10 +181,11 @@ export const App = () => {
 				pickingPoint={routeMode !== null}
 				routeFromPoint={routeFromPoint}
 				onMapClick={handleMapClick}
-				onClearRoute={() => { clearRoute(); setIsCurrentRouteSaved(false); }}
+				onClearRoute={() => { clearRoute(); setIsCurrentRouteSaved(false); setIsRecordedRoute(false); }}
 				onUndoWaypoint={undoWaypoint}
 				onSaveRoute={user ? handleSaveRoute : undefined}
 				isSavedRoute={isCurrentRouteSaved}
+				isRecordedRoute={isRecordedRoute}
 				trackPoints={tracking.trackPoints}
 			/>
 		</div>

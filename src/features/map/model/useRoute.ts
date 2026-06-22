@@ -13,6 +13,7 @@ export interface UseRouteReturn {
 	loading: boolean;
 	error: string | null;
 	buildRoute: (from: LatLngTuple, to: LatLngTuple, waypoints?: LatLngTuple[]) => Promise<void>;
+	restoreRoute: (result: RouteResult) => void;
 	addWaypoint: (point: LatLngTuple) => Promise<void>;
 	undoWaypoint: () => Promise<void>;
 	clearRoute: () => void;
@@ -56,6 +57,14 @@ export const useRoute = (): UseRouteReturn => {
 		await buildRoute(routeFrom, routeTo, next);
 	}, [routeFrom, routeTo, waypoints, buildRoute]);
 
+	const restoreRoute = useCallback((result: RouteResult) => {
+		setRoute(result);
+		setRouteFrom(null);
+		setRouteTo(null);
+		setWaypoints([]);
+		setError(null);
+	}, []);
+
 	const clearRoute = useCallback(() => {
 		setRoute(null);
 		setWaypoints([]);
@@ -64,5 +73,5 @@ export const useRoute = (): UseRouteReturn => {
 		setError(null);
 	}, []);
 
-	return { route, waypoints, routeFrom, routeTo, loading, error, buildRoute, addWaypoint, undoWaypoint, clearRoute };
+	return { route, waypoints, routeFrom, routeTo, loading, error, buildRoute, restoreRoute, addWaypoint, undoWaypoint, clearRoute };
 };

@@ -21,6 +21,7 @@ export interface SavedRoute {
 	duration: number;
 	coordinates: LatLngTuple[];
 	createdAt: number;
+	isRecorded: boolean;
 }
 
 export const useSavedRoutes = (userId: string | null | undefined) => {
@@ -51,6 +52,7 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 							duration: data.duration as number,
 							coordinates: JSON.parse(data.coordinates) as LatLngTuple[],
 							createdAt: data.createdAt as number,
+							isRecorded: (data.isRecorded as boolean | undefined) ?? false,
 						} satisfies SavedRoute;
 					})
 					.sort((a, b) => b.createdAt - a.createdAt);
@@ -61,7 +63,7 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 	}, [userId]);
 
 	const saveRoute = useCallback(
-		async (route: RouteResult, from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[]) => {
+		async (route: RouteResult, from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[], isRecorded = false) => {
 			if (!userId) return;
 			await addDoc(collection(db, 'savedRoutes'), {
 				userId,
@@ -72,6 +74,7 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 				duration: route.duration,
 				coordinates: JSON.stringify(route.coordinates),
 				createdAt: Date.now(),
+				isRecorded,
 			});
 		},
 		[userId],

@@ -1,4 +1,3 @@
-import { Button } from '../../../shared/ui/button';
 import { MAP_STYLES } from '../model/map-styles';
 import type { MapStyleKey } from '../model/map-styles';
 
@@ -14,14 +13,19 @@ export const MapStyleSwitcher = ({ activeStyle, onChange }: MapStyleSwitcherProp
 			<h5 className='map-style-switcher__title'>Виды карты</h5>
 			<div className='map-style-switcher__container'>
 				{(Object.keys(MAP_STYLES) as MapStyleKey[]).map((key) => (
-					<Button
+					<button
 						key={key}
 						onClick={() => onChange(key)}
-						className={`btn btn--style ${activeStyle === key ? 'active' : ''}`}
+						className={`btn map-style-thumb ${activeStyle === key ? 'active' : ''}`}
 						title={MAP_STYLES[key].label}
+						type='button'
 					>
-						{MAP_STYLES[key].label}
-					</Button>
+						<img
+							src={MAP_STYLES[key].thumbnail}
+							alt={MAP_STYLES[key].label}
+							draggable={false}
+						/>
+					</button>
 				))}
 			</div>
 		</div>

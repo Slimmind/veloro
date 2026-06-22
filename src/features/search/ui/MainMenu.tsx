@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import type { LatLngTuple } from 'leaflet';
 import { Button } from '../../../shared/ui/button';
 import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MapStyleSwitcher } from '../../map/ui/MapStyleSwitcher';
@@ -15,7 +14,7 @@ interface MainMenuProps {
 	onStyleChange: (style: MapStyleKey) => void;
 	savedRoutes?: SavedRoute[];
 	onDeleteSavedRoute?: (id: string) => void;
-	onSelectSavedRoute?: (from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[]) => void;
+	onSelectSavedRoute?: (route: SavedRoute) => void;
 }
 
 function formatDistance(metres: number): string {
@@ -65,7 +64,7 @@ export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRout
 										type='button'
 										className='main-menu__saved-route'
 										onClick={() => {
-											onSelectSavedRoute?.(r.from, r.to, r.waypoints);
+											onSelectSavedRoute?.(r);
 											onToggle();
 										}}
 									>
