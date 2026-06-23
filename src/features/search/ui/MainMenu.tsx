@@ -5,6 +5,7 @@ import { MapStyleSwitcher } from '../../map/ui/MapStyleSwitcher';
 import { useAuth } from '../../auth/model/useAuth';
 import type { MapStyleKey } from '../../map/model/map-styles';
 import type { SavedRoute } from '../../map/model/useSavedRoutes';
+import { formatDistance } from '../../../shared/lib/formatDistance';
 import './main-menu.styles.css';
 
 interface MainMenuProps {
@@ -17,9 +18,6 @@ interface MainMenuProps {
 	onSelectSavedRoute?: (route: SavedRoute) => void;
 }
 
-function formatDistance(metres: number): string {
-	return metres < 1000 ? `${Math.round(metres)} м` : `${(metres / 1000).toFixed(1)} км`;
-}
 
 function formatDuration(seconds: number): string {
 	const minutes = Math.round(seconds / 60);

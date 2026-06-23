@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BackIcon } from '../../../icons/back-icon';
 import { CrossIcon } from '../../../icons/cross-icon';
 import { SaveIcon } from '../../../icons/save-icon';
+import { formatDistance } from '../../../shared/lib/formatDistance';
 import './route-info.styles.css';
 
 interface RouteInfoProps {
@@ -15,11 +16,6 @@ interface RouteInfoProps {
 	onClear?: () => void;
 }
 
-function formatDistance(metres: number): string {
-	return metres < 1000
-		? `${Math.round(metres)} м`
-		: `${(metres / 1000).toFixed(1)} км`;
-}
 
 function formatDuration(seconds: number): string {
 	const minutes = Math.round(seconds / 60);

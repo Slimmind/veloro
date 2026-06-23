@@ -39,7 +39,7 @@ const ROUTE_MODES: {
 			mode: 'record-track',
 			label: 'Запись маршрута',
 			description: 'Отслеживайте свой путь в реальном времени',
-			icon: <RecordIcon size='28' />,
+			icon: <RecordIcon size='32' />,
 		},
 	];
 

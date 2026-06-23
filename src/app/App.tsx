@@ -18,11 +18,8 @@ export const App = () => {
 	const [pathBuilderOpen, setPathBuilderOpen] = useState(false);
 	const [routeMode, setRouteMode] = useState<RouteMode | null>(null);
 	const [routeFromPoint, setRouteFromPoint] = useState<LatLngTuple | null>(null);
-	const [isCurrentRouteSaved, setIsCurrentRouteSaved] = useState(false);
-
 	const geolocation = useUserGeolocation();
-	const { route, waypoints, routeFrom, routeTo, buildRoute, restoreRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute } = useRoute();
-	const [isRecordedRoute, setIsRecordedRoute] = useState(false);
+	const { route, waypoints, routeFrom, routeTo, buildRoute, restoreRoute, addWaypoint, undoWaypoint, error: routeError, clearRoute, isSaved, isRecorded, markSaved } = useRoute();
 	const tracking = useTrackRecording(geolocation.position);
 	const { results, loading, error, search } = useMapSearch();
 	const { history: routeHistory, addToHistory } = useRouteHistory();
@@ -57,8 +54,6 @@ export const App = () => {
 
 	const handleDirectionClick = useCallback(
 		(result: SearchResult) => {
-			setIsCurrentRouteSaved(false);
-			setIsRecordedRoute(false);
 			addToHistory(result);
 			if (geolocation.position) {
 				buildRoute(geolocation.position, result.position);
@@ -84,8 +79,6 @@ export const App = () => {
 			if (!routeMode) return;
 
 			if (routeMode === 'from-me') {
-				setIsCurrentRouteSaved(false);
-				setIsRecordedRoute(false);
 				if (geolocation.position) {
 					buildRoute(geolocation.position, latlng);
 				} else {
@@ -97,14 +90,11 @@ export const App = () => {
 				if (!routeFromPoint) {
 					setRouteFromPoint(latlng);
 				} else {
-					setIsCurrentRouteSaved(false);
-					setIsRecordedRoute(false);
 					buildRoute(routeFromPoint, latlng);
 					setRouteFromPoint(null);
 					setRouteMode(null);
 				}
 			} else if (routeMode === 'add-waypoint') {
-				setIsCurrentRouteSaved(false);
 				addWaypoint(latlng);
 				setRouteMode(null);
 			}
@@ -134,20 +124,17 @@ export const App = () => {
 
 	const handleSelectSavedRoute = useCallback(
 		(savedRoute: import('../features/map/model/useSavedRoutes').SavedRoute) => {
-			setIsCurrentRouteSaved(true);
 			if (savedRoute.isRecorded) {
-				setIsRecordedRoute(true);
-				restoreRoute({
-					coordinates: savedRoute.coordinates,
-					distance: savedRoute.distance,
-					duration: savedRoute.duration,
-				});
+				restoreRoute(
+					{ coordinates: savedRoute.coordinates, distance: savedRoute.distance, duration: savedRoute.duration },
+					{ isSaved: true, isRecorded: true },
+				);
 			} else {
-				setIsRecordedRoute(false);
 				buildRoute(savedRoute.from, savedRoute.to, savedRoute.waypoints);
+				markSaved();
 			}
 		},
-		[buildRoute, restoreRoute],
+		[buildRoute, restoreRoute, markSaved],
 	);
 
 	return (
@@ -159,7 +146,7 @@ export const App = () => {
 				searchResults={results}
 				searchError={error}
 				routeError={routeError}
-				onRouteDismiss={() => { clearRoute(); setIsCurrentRouteSaved(false); setIsRecordedRoute(false); }}
+				onRouteDismiss={clearRoute}
 				activeStyle={activeStyle}
 				onStyleChange={setActiveStyle}
 				userPosition={geolocation.position}
@@ -192,11 +179,11 @@ export const App = () => {
 				pickingPoint={routeMode !== null}
 				routeFromPoint={routeFromPoint}
 				onMapClick={handleMapClick}
-				onClearRoute={() => { clearRoute(); setIsCurrentRouteSaved(false); setIsRecordedRoute(false); }}
+				onClearRoute={clearRoute}
 				onUndoWaypoint={undoWaypoint}
 				onSaveRoute={user ? handleSaveRoute : undefined}
-				isSavedRoute={isCurrentRouteSaved}
-				isRecordedRoute={isRecordedRoute}
+				isSavedRoute={isSaved}
+				isRecordedRoute={isRecorded}
 				trackPoints={tracking.trackPoints}
 			/>
 			{showGeoError && geolocation.error && (

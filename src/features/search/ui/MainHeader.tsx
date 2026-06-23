@@ -9,6 +9,8 @@ import { MainMenu } from './MainMenu';
 import { PinIcon } from '../../../icons/pin-icon';
 import { HistoryIcon } from '../../../icons/history-icon';
 import { Auth } from '../../auth/ui/Auth';
+import { haversine } from '../../../shared/lib/haversine';
+import { formatDistance } from '../../../shared/lib/formatDistance';
 import './main-header.styles.css';
 
 interface MainHeaderProps {
@@ -28,23 +30,6 @@ interface MainHeaderProps {
 	onSelectSavedRoute?: (route: SavedRoute) => void;
 }
 
-function haversineDistance(a: LatLngTuple, b: LatLngTuple): number {
-	const R = 6371000;
-	const toRad = (deg: number) => (deg * Math.PI) / 180;
-	const dLat = toRad(b[0] - a[0]);
-	const dLon = toRad(b[1] - a[1]);
-	const sinLat = Math.sin(dLat / 2);
-	const sinLon = Math.sin(dLon / 2);
-	const h =
-		sinLat * sinLat +
-		Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * sinLon * sinLon;
-	return R * 2 * Math.asin(Math.sqrt(h));
-}
-
-function formatDistance(meters: number): string {
-	if (meters < 1000) return `${Math.round(meters)} м`;
-	return `${(meters / 1000).toFixed(1)} км`;
-}
 
 export const MainHeader = ({
 	onSearch,
@@ -177,8 +162,8 @@ export const MainHeader = ({
 										{(userPosition
 											? [...searchResults].sort(
 												(a, b) =>
-													haversineDistance(userPosition, a.position) -
-													haversineDistance(userPosition, b.position),
+													haversine(userPosition, a.position) -
+													haversine(userPosition, b.position),
 											)
 											: searchResults
 										).map((result, index) => (
@@ -195,7 +180,7 @@ export const MainHeader = ({
 													{userPosition && (
 														<span className='result-distance'>
 															{formatDistance(
-																haversineDistance(
+																haversine(
 																	userPosition,
 																	result.position,
 																),
@@ -231,7 +216,7 @@ export const MainHeader = ({
 														{userPosition && (
 															<span className='result-distance'>
 																{formatDistance(
-																	haversineDistance(
+																	haversine(
 																		userPosition,
 																		result.position,
 																	),

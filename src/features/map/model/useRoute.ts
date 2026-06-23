@@ -12,11 +12,14 @@ export interface UseRouteReturn {
 	routeTo: LatLngTuple | null;
 	loading: boolean;
 	error: string | null;
+	isSaved: boolean;
+	isRecorded: boolean;
 	buildRoute: (from: LatLngTuple, to: LatLngTuple, waypoints?: LatLngTuple[]) => Promise<void>;
-	restoreRoute: (result: RouteResult) => void;
+	restoreRoute: (result: RouteResult, opts?: { isSaved?: boolean; isRecorded?: boolean }) => void;
 	addWaypoint: (point: LatLngTuple) => Promise<void>;
 	undoWaypoint: () => Promise<void>;
 	clearRoute: () => void;
+	markSaved: () => void;
 }
 
 export const useRoute = (): UseRouteReturn => {
@@ -26,8 +29,12 @@ export const useRoute = (): UseRouteReturn => {
 	const [routeTo, setRouteTo] = useState<LatLngTuple | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [isSaved, setIsSaved] = useState(false);
+	const [isRecorded, setIsRecorded] = useState(false);
 
 	const buildRoute = useCallback(async (from: LatLngTuple, to: LatLngTuple, wps: LatLngTuple[] = []) => {
+		setIsSaved(false);
+		setIsRecorded(false);
 		setLoading(true);
 		setError(null);
 		try {
@@ -57,12 +64,14 @@ export const useRoute = (): UseRouteReturn => {
 		await buildRoute(routeFrom, routeTo, next);
 	}, [routeFrom, routeTo, waypoints, buildRoute]);
 
-	const restoreRoute = useCallback((result: RouteResult) => {
+	const restoreRoute = useCallback((result: RouteResult, opts: { isSaved?: boolean; isRecorded?: boolean } = {}) => {
 		setRoute(result);
 		setRouteFrom(null);
 		setRouteTo(null);
 		setWaypoints([]);
 		setError(null);
+		setIsSaved(opts.isSaved ?? false);
+		setIsRecorded(opts.isRecorded ?? false);
 	}, []);
 
 	const clearRoute = useCallback(() => {
@@ -71,7 +80,11 @@ export const useRoute = (): UseRouteReturn => {
 		setRouteFrom(null);
 		setRouteTo(null);
 		setError(null);
+		setIsSaved(false);
+		setIsRecorded(false);
 	}, []);
 
-	return { route, waypoints, routeFrom, routeTo, loading, error, buildRoute, restoreRoute, addWaypoint, undoWaypoint, clearRoute };
+	const markSaved = useCallback(() => setIsSaved(true), []);
+
+	return { route, waypoints, routeFrom, routeTo, loading, error, isSaved, isRecorded, buildRoute, restoreRoute, addWaypoint, undoWaypoint, clearRoute, markSaved };
 };
