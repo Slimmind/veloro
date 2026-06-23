@@ -4,3 +4,26 @@
 .app {
   position: relative;
 }
+
+.geo-error-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 10px 16px;
+  border: 1px solid #991b1b;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  white-space: nowrap;
+  animation: geoErrorIn 0.2s ease;
+}
+
+@keyframes geoErrorIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

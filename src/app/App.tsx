@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LatLngTuple } from 'leaflet';
 import { MainHeader, PathBuilder, useMapSearch, useRouteHistory, type SearchResult } from '../features/search';
 import type { RouteMode } from '../features/search';
@@ -28,6 +28,17 @@ export const App = () => {
 	const { history: routeHistory, addToHistory } = useRouteHistory();
 	const { user, authLoading } = useAuth();
 	const { savedRoutes, saveRoute, deleteRoute } = useSavedRoutes(authLoading ? undefined : (user?.uid ?? null));
+
+	const [showGeoError, setShowGeoError] = useState(false);
+	const geoErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		if (!geolocation.error) return;
+		setPendingRoute(null);
+		if (geoErrorTimerRef.current) clearTimeout(geoErrorTimerRef.current);
+		setShowGeoError(true);
+		geoErrorTimerRef.current = setTimeout(() => setShowGeoError(false), 4000);
+	}, [geolocation.error]);
 
 	// Build pending route once geolocation becomes available
 	useEffect(() => {
@@ -188,6 +199,9 @@ export const App = () => {
 				isRecordedRoute={isRecordedRoute}
 				trackPoints={tracking.trackPoints}
 			/>
+			{showGeoError && geolocation.error && (
+				<div className='geo-error-toast'>{geolocation.error}</div>
+			)}
 		</div>
 	);
 };

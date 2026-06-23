@@ -1,6 +1,9 @@
 import type { TrackStatus } from '../model/useTrackRecording';
 import { CrossIcon } from '../../../icons/cross-icon';
 import { SaveIcon } from '../../../icons/save-icon';
+import { PauseIcon } from '../../../icons/pause-icon';
+import { PlayIcon } from '../../../icons/play-icon';
+import { StopIcon } from '../../../icons/stop-icon';
 import './tracking-panel.styles.css';
 
 function formatTime(seconds: number): string {
@@ -44,7 +47,7 @@ export const TrackingPanel = ({
 
 	return (
 		<div className='tracking-panel'>
-			<div className='tracking-panel__indicator'>
+			<div className='tracking-panel__header'>
 				<span className={`tracking-panel__dot ${status === 'recording' ? 'tracking-panel__dot--active' : ''}`} />
 				<span className='tracking-panel__label'>{statusLabel}</span>
 			</div>
@@ -56,42 +59,56 @@ export const TrackingPanel = ({
 				{status !== 'stopped' ? (
 					<>
 						{status === 'recording' ? (
-							<button type='button' className='btn tracking-panel__btn' onClick={onPause}>
-								Пауза
+							<button
+								type='button'
+								className='tracking-panel__btn'
+								onClick={onPause}
+								aria-label='Пауза'
+								title='Пауза'
+							>
+								<PauseIcon size='16' />
 							</button>
 						) : (
-							<button type='button' className='btn tracking-panel__btn' onClick={onResume}>
-								Продолжить
+							<button
+								type='button'
+								className='tracking-panel__btn'
+								onClick={onResume}
+								aria-label='Продолжить'
+								title='Продолжить'
+							>
+								<PlayIcon size='16' />
 							</button>
 						)}
 						<button
 							type='button'
-							className='btn tracking-panel__btn tracking-panel__btn--stop'
+							className='tracking-panel__btn tracking-panel__btn--stop'
 							onClick={onStop}
+							aria-label='Стоп'
+							title='Стоп'
 						>
-							Стоп
+							<StopIcon size='16' />
 						</button>
 					</>
 				) : (
 					<>
 						<button
 							type='button'
-							className='btn tracking-panel__btn tracking-panel__btn--icon'
+							className='tracking-panel__btn tracking-panel__btn--danger'
 							onClick={onClear}
 							aria-label='Удалить запись'
 							title='Удалить запись'
 						>
-							<CrossIcon size='16' />
+							<CrossIcon size='16' color='currentColor' />
 						</button>
 						{onSave && (
 							<button
 								type='button'
-								className='btn tracking-panel__btn tracking-panel__btn--icon'
+								className='tracking-panel__btn'
 								onClick={onSave}
 								aria-label='Сохранить трек'
 								title='Сохранить трек'
 							>
-								<SaveIcon size='20' />
+								<SaveIcon size='18' color='currentColor' />
 							</button>
 						)}
 					</>

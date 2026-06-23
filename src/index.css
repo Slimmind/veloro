@@ -24,12 +24,13 @@
   --color-white: rgb(255, 255, 255);
   --color-black: rgb(0, 0, 0);
   --color-red: #dc2626;
+  --color-orange: #ff6600;
   --color-red-soft: #fca5a5;
   --color-red-softer: #fef2f2;
   --color-green: rgb(46, 139, 86);
   --color-blue: rgb(46, 99, 139);
   --color-violet: #535bf2;
-  --color-violet-light: rgb(100, 108, 255);
+  --color-violet-light: #646cff;
   --color-violet-transparent: rgba(83, 91, 242, var(--opacity));
   --color-white-transparent: rgba(255, 255, 255, var(--opacity));
   --color-magenta: rgb(255, 0, 255);

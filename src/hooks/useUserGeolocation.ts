@@ -82,7 +82,7 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 					console.warn('Geolocation error:', err);
 					clearTimeout(safetyTimer);
 					const msg = err.code === 1
-						? 'Доступ к геолокации запрещён'
+						? 'Доступ к геолокации запрещён — разрешите его в настройках браузера'
 						: 'Не удалось определить местоположение';
 					setError(msg);
 					if (!resolved) {

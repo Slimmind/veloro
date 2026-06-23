@@ -46,7 +46,7 @@ export function useTrackRecording(currentPosition: LatLngTuple | null) {
 	useEffect(() => {
 		if (status !== 'recording' || !currentPosition) return;
 		const last = lastPosRef.current;
-		if (last?.[0] === currentPosition[0] && last?.[1] === currentPosition[1]) return;
+		if (last !== null && haversine(last, currentPosition) < 3) return;
 		lastPosRef.current = currentPosition;
 		setTrackPoints((prev) => [...prev, currentPosition]);
 	}, [currentPosition, status]);
