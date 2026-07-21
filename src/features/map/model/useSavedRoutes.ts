@@ -5,6 +5,7 @@ import {
 	where,
 	addDoc,
 	deleteDoc,
+	updateDoc,
 	doc,
 	onSnapshot,
 } from 'firebase/firestore';
@@ -22,6 +23,7 @@ export interface SavedRoute {
 	coordinates: LatLngTuple[];
 	createdAt: number;
 	isRecorded: boolean;
+	name?: string;
 }
 
 export const useSavedRoutes = (userId: string | null | undefined) => {
@@ -53,6 +55,7 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 							coordinates: JSON.parse(data.coordinates) as LatLngTuple[],
 							createdAt: data.createdAt as number,
 							isRecorded: (data.isRecorded as boolean | undefined) ?? false,
+						name: data.name as string | undefined,
 						} satisfies SavedRoute;
 					})
 					.sort((a, b) => b.createdAt - a.createdAt);
@@ -63,7 +66,7 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 	}, [userId]);
 
 	const saveRoute = useCallback(
-		async (route: RouteResult, from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[], isRecorded = false) => {
+		async (route: RouteResult, from: LatLngTuple, to: LatLngTuple, waypoints: LatLngTuple[], isRecorded = false, name?: string) => {
 			if (!userId) return;
 			await addDoc(collection(db, 'savedRoutes'), {
 				userId,
@@ -75,6 +78,7 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 				coordinates: JSON.stringify(route.coordinates),
 				createdAt: Date.now(),
 				isRecorded,
+				...(name ? { name } : {}),
 			});
 		},
 		[userId],
@@ -84,5 +88,9 @@ export const useSavedRoutes = (userId: string | null | undefined) => {
 		await deleteDoc(doc(db, 'savedRoutes', id));
 	}, []);
 
-	return { savedRoutes, saveRoute, deleteRoute };
+	const updateRouteName = useCallback(async (id: string, name: string) => {
+		await updateDoc(doc(db, 'savedRoutes', id), { name });
+	}, []);
+
+	return { savedRoutes, saveRoute, deleteRoute, updateRouteName };
 };

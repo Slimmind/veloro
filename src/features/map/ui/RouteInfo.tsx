@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BackIcon } from '../../../icons/back-icon';
 import { CrossIcon } from '../../../icons/cross-icon';
 import { SaveIcon } from '../../../icons/save-icon';
@@ -10,8 +10,9 @@ interface RouteInfoProps {
 	duration: number;
 	traveled?: number;
 	hasWaypoints?: boolean;
-	onSave?: () => void;
+	onSave?: (name: string) => void;
 	isSaved?: boolean;
+	routeName?: string;
 	onUndo?: () => void;
 	onClear?: () => void;
 }
@@ -25,25 +26,81 @@ function formatDuration(seconds: number): string {
 	return m > 0 ? `${h} ч ${m} мин` : `${h} ч`;
 }
 
-export const RouteInfo = ({ distance, duration, traveled, hasWaypoints, onSave, isSaved, onUndo, onClear }: RouteInfoProps) => {
+export const RouteInfo = ({ distance, duration, traveled, hasWaypoints, onSave, isSaved, routeName, onUndo, onClear }: RouteInfoProps) => {
 	const [saved, setSaved] = useState(false);
+	const [naming, setNaming] = useState(false);
+	const [nameValue, setNameValue] = useState('');
+	const [savedName, setSavedName] = useState('');
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		setSaved(false);
+		setNaming(false);
+		setNameValue('');
+		setSavedName('');
 	}, [distance, duration]);
 
-	const handleSave = () => {
-		onSave?.();
-		setSaved(true);
+	useEffect(() => {
+		if (naming) inputRef.current?.focus();
+	}, [naming]);
+
+	const handleSaveClick = () => {
+		setNaming(true);
 	};
+
+	const handleConfirmName = () => {
+		const trimmed = nameValue.trim();
+		onSave?.(trimmed);
+		setSaved(true);
+		setSavedName(trimmed);
+		setNaming(false);
+	};
+
+	const handleCancelNaming = () => {
+		setNaming(false);
+		setNameValue('');
+	};
+
+	const displayName = naming
+		? null
+		: saved && savedName
+			? savedName
+			: isSaved && routeName
+				? routeName
+				: null;
 
 	return (
 		<div className='route-info'>
-			{onSave && !saved && !isSaved && (
+			{!naming && onSave && !saved && !isSaved && (
 				<>
-					<button className='route-info__btn' type='button' onClick={handleSave} title='Сохранить маршрут'>
+					<button className='route-info__btn' type='button' onClick={handleSaveClick} title='Сохранить маршрут'>
 						<SaveIcon />
 					</button>
+					<span className='route-info__divider' />
+				</>
+			)}
+			{naming && (
+				<>
+					<input
+						ref={inputRef}
+						className='route-info__name-input'
+						value={nameValue}
+						onChange={(e) => setNameValue(e.target.value)}
+						placeholder='Название...'
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') handleConfirmName();
+							if (e.key === 'Escape') handleCancelNaming();
+						}}
+					/>
+					<button className='route-info__btn' type='button' onClick={handleConfirmName} title='Подтвердить'>
+						✓
+					</button>
+					<span className='route-info__divider' />
+				</>
+			)}
+			{displayName && (
+				<>
+					<span className='route-info__name'>{displayName}</span>
 					<span className='route-info__divider' />
 				</>
 			)}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { BikeLegend } from '../../../shared/ui/bike-legend/BikeLegend';
 import { MapStyleSwitcher } from '../../map/ui/MapStyleSwitcher';
@@ -7,6 +7,8 @@ import type { MapStyleKey } from '../../map/model/map-styles';
 import type { SavedRoute } from '../../map/model/useSavedRoutes';
 import { formatDistance } from '../../../shared/lib/formatDistance';
 import './main-menu.styles.css';
+import { EditIcon } from '../../../icons/edit-icon';
+import { SaveIcon } from '../../../icons/save-icon';
 
 interface MainMenuProps {
 	open: boolean;
@@ -16,6 +18,7 @@ interface MainMenuProps {
 	savedRoutes?: SavedRoute[];
 	onDeleteSavedRoute?: (id: string) => void;
 	onSelectSavedRoute?: (route: SavedRoute) => void;
+	onUpdateRouteName?: (id: string, name: string) => void;
 }
 
 
@@ -31,9 +34,11 @@ function formatDate(ts: number): string {
 	return new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
 }
 
-export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRoutes = [], onDeleteSavedRoute, onSelectSavedRoute }: MainMenuProps) => {
+export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRoutes = [], onDeleteSavedRoute, onSelectSavedRoute, onUpdateRouteName }: MainMenuProps) => {
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const { user } = useAuth();
+	const [editingId, setEditingId] = useState<string | null>(null);
+	const [editValue, setEditValue] = useState('');
 
 	useEffect(() => {
 		if (!open) return;
@@ -45,6 +50,22 @@ export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRout
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, [open, onToggle]);
+
+	const handleEditStart = (id: string, currentName: string) => {
+		setEditingId(id);
+		setEditValue(currentName);
+	};
+
+	const handleEditConfirm = (id: string) => {
+		onUpdateRouteName?.(id, editValue.trim());
+		setEditingId(null);
+		setEditValue('');
+	};
+
+	const handleEditCancel = () => {
+		setEditingId(null);
+		setEditValue('');
+	};
 
 	return (
 		<div ref={wrapperRef}>
@@ -58,26 +79,65 @@ export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRout
 						<ul className='main-menu__saved-list'>
 							{savedRoutes.map((r) => (
 								<li key={r.id} className='main-menu__saved-item'>
-									<button
-										type='button'
-										className='main-menu__saved-route'
-										onClick={() => {
-											onSelectSavedRoute?.(r);
-											onToggle();
-										}}
-									>
-										<span className='main-menu__saved-dist'>{formatDistance(r.distance)}</span>
-										<span className='main-menu__saved-dur'>{formatDuration(r.duration)}</span>
-										<span className='main-menu__saved-date'>{formatDate(r.createdAt)}</span>
-									</button>
-									<button
-										type='button'
-										className='main-menu__saved-delete'
-										onClick={() => onDeleteSavedRoute?.(r.id)}
-										title='Удалить'
-									>
-										✕
-									</button>
+									{editingId === r.id ? (
+										<div className='main-menu__saved-edit'>
+											<input
+												className='main-menu__saved-edit-input'
+												value={editValue}
+												onChange={(e) => setEditValue(e.target.value)}
+												placeholder='Название маршрута...'
+												autoFocus
+												onKeyDown={(e) => {
+													if (e.key === 'Enter') handleEditConfirm(r.id);
+													if (e.key === 'Escape') handleEditCancel();
+												}}
+											/>
+											<button
+												type='button'
+												className='main-menu__saved-confirm'
+												onClick={() => handleEditConfirm(r.id)}
+												title='Сохранить'
+											><SaveIcon size="20" color="var(--color-violet)" /></button>
+											<button
+												type='button'
+												className='main-menu__saved-confirm'
+												onClick={handleEditCancel}
+												title='Отмена'
+											>✕</button>
+										</div>
+									) : (
+										<>
+											<button
+												type='button'
+												className='main-menu__saved-edit-btn'
+												onClick={() => handleEditStart(r.id, r.name ?? '')}
+												title='Переименовать'
+											><EditIcon /></button>
+											<button
+												type='button'
+												className='main-menu__saved-route'
+												onClick={() => {
+													onSelectSavedRoute?.(r);
+													onToggle();
+												}}
+											>
+												{r.name && <span className='main-menu__saved-name'>{r.name}</span>}
+												<div className='main-menu__saved-meta'>
+													<span className='main-menu__saved-dist'>{formatDistance(r.distance)}</span>
+													<span className='main-menu__saved-dur'>{formatDuration(r.duration)}</span>
+													<span className='main-menu__saved-date'>{formatDate(r.createdAt)}</span>
+												</div>
+											</button>
+											<button
+												type='button'
+												className='main-menu__saved-delete'
+												onClick={() => onDeleteSavedRoute?.(r.id)}
+												title='Удалить'
+											>
+												✕
+											</button>
+										</>
+									)}
 								</li>
 							))}
 						</ul>

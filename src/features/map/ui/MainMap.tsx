@@ -51,9 +51,10 @@ interface MainMapProps {
 	onMapClick?: (latlng: LatLngTuple) => void;
 	onClearRoute?: () => void;
 	onUndoWaypoint?: () => void;
-	onSaveRoute?: () => void;
+	onSaveRoute?: (name: string) => void;
 	isSavedRoute?: boolean;
 	isRecordedRoute?: boolean;
+	routeName?: string;
 	trackPoints?: LatLngTuple[];
 }
 
@@ -92,6 +93,7 @@ export const MainMap = ({
 	onSaveRoute,
 	isSavedRoute,
 	isRecordedRoute = false,
+	routeName,
 	trackPoints = [],
 }: MainMapProps) => {
 	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
@@ -134,6 +136,7 @@ export const MainMap = ({
 					hasWaypoints={waypoints.length > 0}
 					onSave={onSaveRoute}
 					isSaved={isSavedRoute}
+					routeName={routeName}
 					onUndo={onUndoWaypoint}
 					onClear={onClearRoute}
 				/>

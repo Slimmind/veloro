@@ -2,10 +2,10 @@
   position: absolute;
   top: 70px;
   right: 20px;
-  z-index: 1000;
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: calc(100dvw - 40px);
   padding: 10px 16px;
   background-color: var(--color-magenta-transparent);
   --opacity: 0.85;
@@ -19,6 +19,7 @@
   pointer-events: none;
   /* buttons inside override this */
   animation: slideUp 0.2s ease;
+  z-index: 1000;
 }
 
 .route-info__item {
@@ -49,4 +50,30 @@
 .route-info__btn:hover {
   opacity: 1;
   background: rgba(255, 255, 255, 0.15);
+}
+
+.route-info__name-input {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  color: var(--color-white);
+  font-size: 0.85rem;
+  font-family: inherit;
+  font-weight: 500;
+  padding: 3px 10px;
+  width: 130px;
+  outline: none;
+}
+
+.route-info__name-input::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.route-info__name {
+  font-weight: 600;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

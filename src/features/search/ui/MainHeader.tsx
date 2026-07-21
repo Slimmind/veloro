@@ -28,6 +28,7 @@ interface MainHeaderProps {
 	savedRoutes?: SavedRoute[];
 	onDeleteSavedRoute?: (id: string) => void;
 	onSelectSavedRoute?: (route: SavedRoute) => void;
+	onUpdateRouteName?: (id: string, name: string) => void;
 }
 
 
@@ -46,6 +47,7 @@ export const MainHeader = ({
 	savedRoutes = [],
 	onDeleteSavedRoute,
 	onSelectSavedRoute,
+	onUpdateRouteName,
 }: MainHeaderProps) => {
 	const [searchQuery, setSearchQuery] = useState<string>('');
 	const [showResults, setShowResults] = useState(false);
@@ -105,6 +107,7 @@ export const MainHeader = ({
 				savedRoutes={savedRoutes}
 				onDeleteSavedRoute={onDeleteSavedRoute}
 				onSelectSavedRoute={onSelectSavedRoute}
+				onUpdateRouteName={onUpdateRouteName}
 			/>
 			{legendVisible && !menuOpen && (
 				<div className='bike-legend-panel'>
