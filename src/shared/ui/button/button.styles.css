@@ -2,6 +2,7 @@
   position: relative;
   flex-shrink: 0;
   padding: 8px;
+  pointer-events: auto;
   background-color: var(--color-violet-transparent);
   backdrop-filter: blur(var(--blur));
   border: 0;
@@ -56,6 +57,10 @@
   background-color: var(--color-white);
   border-radius: 2px;
   box-shadow: 0 8px 0 0 var(--color-white), 0 16px 0 0 var(--color-white);
+}
+
+.btn--delete {
+  background-color: var(--color-magenta-transparent);
 }
 
 .btn--search {

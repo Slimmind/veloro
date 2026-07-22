@@ -9,6 +9,7 @@ import { formatDistance } from '../../../shared/lib/formatDistance';
 import './main-menu.styles.css';
 import { EditIcon } from '../../../icons/edit-icon';
 import { SaveIcon } from '../../../icons/save-icon';
+import { CrossIcon } from '../../../icons/cross-icon';
 
 interface MainMenuProps {
 	open: boolean;
@@ -107,12 +108,12 @@ export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRout
 										</div>
 									) : (
 										<>
-											<button
+											<Button
+												mod='circle icon edit'
 												type='button'
-												className='main-menu__saved-edit-btn'
 												onClick={() => handleEditStart(r.id, r.name ?? '')}
 												title='Переименовать'
-											><EditIcon /></button>
+											><EditIcon size="20" color="var(--color-white)" /></Button>
 											<button
 												type='button'
 												className='main-menu__saved-route'
@@ -128,14 +129,12 @@ export const MainMenu = ({ open, onToggle, activeStyle, onStyleChange, savedRout
 													<span className='main-menu__saved-date'>{formatDate(r.createdAt)}</span>
 												</div>
 											</button>
-											<button
+											<Button
+												mod='circle icon delete'
 												type='button'
-												className='main-menu__saved-delete'
 												onClick={() => onDeleteSavedRoute?.(r.id)}
 												title='Удалить'
-											>
-												✕
-											</button>
+											><CrossIcon size="20" color="var(--color-white)" /></Button>
 										</>
 									)}
 								</li>

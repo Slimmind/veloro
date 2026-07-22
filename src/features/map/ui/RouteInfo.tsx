@@ -4,6 +4,8 @@ import { CrossIcon } from '../../../icons/cross-icon';
 import { SaveIcon } from '../../../icons/save-icon';
 import { formatDistance } from '../../../shared/lib/formatDistance';
 import './route-info.styles.css';
+import { Button } from '../../../shared/ui/button';
+import { CheckIcon } from '../../../icons/check-icon';
 
 interface RouteInfoProps {
 	distance: number;
@@ -73,9 +75,9 @@ export const RouteInfo = ({ distance, duration, traveled, hasWaypoints, onSave, 
 		<div className='route-info'>
 			{!naming && onSave && !saved && !isSaved && (
 				<>
-					<button className='route-info__btn' type='button' onClick={handleSaveClick} title='Сохранить маршрут'>
-						<SaveIcon />
-					</button>
+					<Button className='route-info__btn' type='button' onClick={handleSaveClick} title='Сохранить маршрут'>
+						<SaveIcon color="var(--color-magenta)" />
+					</Button>
 					<span className='route-info__divider' />
 				</>
 			)}
@@ -93,9 +95,8 @@ export const RouteInfo = ({ distance, duration, traveled, hasWaypoints, onSave, 
 						}}
 					/>
 					<button className='route-info__btn' type='button' onClick={handleConfirmName} title='Подтвердить'>
-						✓
+						<CheckIcon size="32" color="var(--color-magenta)" />
 					</button>
-					<span className='route-info__divider' />
 				</>
 			)}
 			{displayName && (
@@ -104,7 +105,7 @@ export const RouteInfo = ({ distance, duration, traveled, hasWaypoints, onSave, 
 					<span className='route-info__divider' />
 				</>
 			)}
-			{traveled != null && traveled > 0 ? (
+			{!naming && (traveled != null && traveled > 0 ? (
 				<>
 					<span className='route-info__item'>{formatDistance(traveled)}</span>
 					<span className='route-info__divider' />
@@ -116,21 +117,21 @@ export const RouteInfo = ({ distance, duration, traveled, hasWaypoints, onSave, 
 					<span className='route-info__divider' />
 					<span className='route-info__item'>{formatDuration(duration)}</span>
 				</>
-			)}
+			))}
 			{hasWaypoints && onUndo && (
 				<>
 					<span className='route-info__divider' />
 					<button className='route-info__btn' type='button' onClick={onUndo} title='Отменить последнюю точку'>
-						<BackIcon />
+						<BackIcon color="var(--color-magenta)" />
 					</button>
 				</>
 			)}
 			{onClear && (
 				<>
 					<span className='route-info__divider' />
-					<button className='route-info__btn' type='button' onClick={onClear} title='Удалить маршрут'>
+					<Button mod="circle icon delete" type='button' onClick={onClear} title='Удалить маршрут'>
 						<CrossIcon />
-					</button>
+					</Button>
 				</>
 			)}
 		</div>

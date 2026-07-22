@@ -30,8 +30,8 @@ const ROUTE_MODES: {
 		},
 		{
 			mode: 'add-waypoint',
-			label: 'Добавить точку пути',
-			description: 'Укажите промежуточную точку на карте',
+			label: 'Добавить точку коректировки',
+			description: 'Укажите промежуточную точку на карте, чтобы скорректировать маршрут',
 			icon: <AddLocationIcon size='36' />,
 			requiresRoute: true,
 		},

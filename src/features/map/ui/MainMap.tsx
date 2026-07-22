@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+	CircleMarker,
 	MapContainer,
 	Marker,
 	Polyline,
@@ -181,9 +182,14 @@ export const MainMap = ({
 				)}
 
 				{waypoints.map((wp, i) => (
-					<Marker key={`wp-${i}`} position={wp} icon={markerIcon}>
+					<CircleMarker
+						key={`wp-${i}`}
+						center={wp}
+						radius={8}
+						pathOptions={{ color: 'magenta', fillColor: 'magenta', fillOpacity: 1, weight: 2 }}
+					>
 						<Popup>Точка пути {i + 1}</Popup>
-					</Marker>
+					</CircleMarker>
 				))}
 
 			</MapContainer>

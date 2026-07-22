@@ -49,6 +49,8 @@
 .main-menu__saved-item {
   display: flex;
   align-items: center;
+  padding-block: 4px;
+  column-gap: 6px;
   border-top: 1px solid var(--color-violet-transparent);
 }
 
@@ -65,7 +67,7 @@
   padding: 7px 12px 7px 7px;
   background: none;
   border: none;
-  border-radius: 20px;
+  border-radius: 28px;
   color: var(--color-violet);
   font-size: 0.85rem;
   font-family: inherit;
@@ -147,7 +149,7 @@
   flex: 1;
   background: var(--color-violet-transparent);
   border: 1px solid var(--color-violet-transparent);
-  border-radius: 8px;
+  border-radius: 28px;
   color: var(--color-violet);
   font-size: 0.82rem;
   font-family: inherit;

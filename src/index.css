@@ -20,6 +20,7 @@
   --radius-large: 1.5rem;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   --opacity: 0.5;
+  --opacity-weak: 0.2;
 
   --color-white: rgb(255, 255, 255);
   --color-black: rgb(0, 0, 0);
@@ -35,6 +36,7 @@
   --color-white-transparent: rgba(255, 255, 255, var(--opacity));
   --color-magenta: rgb(255, 0, 255);
   --color-magenta-transparent: rgba(255, 0, 255, var(--opacity));
+  --color-magenta-transparent-weak: rgba(255, 0, 255, var(--opacity-weak));
 }
 
 *,
