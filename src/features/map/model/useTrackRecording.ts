@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../../../shared/lib/types';
 import { haversine } from '../../../shared/lib/haversine';
 
 export type TrackStatus = 'idle' | 'recording' | 'paused' | 'stopped';

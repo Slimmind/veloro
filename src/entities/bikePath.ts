@@ -1,4 +1,4 @@
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../shared/lib/types';
 import type { PathStyleKey } from '../shared/config/bike-path-styles';
 
 export interface BikePath {

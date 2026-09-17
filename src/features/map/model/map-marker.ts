@@ -1,15 +1,10 @@
-import L from 'leaflet';
-
-export const createBikeMarkerIcon = (overrides?: Partial<L.IconOptions>) => {
-	return new L.Icon({
-		iconUrl: '/marker.svg',
-		iconSize: [40, 50],
-		iconAnchor: [20, 50],
-		popupAnchor: [0, -45],
-		...overrides,
-	});
+export const createMarkerElement = (satellite = false): HTMLElement => {
+	const el = document.createElement('div');
+	el.style.cssText = 'width:40px;height:50px;transform:translate(-50%,-100%)';
+	const img = document.createElement('img');
+	img.src = satellite ? '/marker-satellite.svg' : '/marker.svg';
+	img.width = 40;
+	img.height = 50;
+	el.appendChild(img);
+	return el;
 };
-
-export const BIKE_MARKER_ICON = createBikeMarkerIcon();
-export const BIKE_MARKER_ICON_SATELLITE = createBikeMarkerIcon({ iconUrl: '/marker-satellite.svg' });
-

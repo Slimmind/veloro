@@ -1,4 +1,4 @@
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../shared/lib/types';
 
 export interface SearchResult {
 	name: string;

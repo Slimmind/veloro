@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { LatLngTuple, Map as LeafletMap } from 'leaflet';
+import type { LatLngTuple } from '../shared/lib/types';
 
 export interface UseGeolocationReturn {
 	position: LatLngTuple | null;
 	accuracy: number | null;
 	loading: boolean;
 	error: string | null;
-	findMe: (map?: LeafletMap, zoom?: number) => Promise<string | null>;
+	findMe: (flyTo?: (position: LatLngTuple, zoom: number) => void, zoom?: number) => Promise<string | null>;
 }
 
 export const useUserGeolocation = (): UseGeolocationReturn => {
@@ -24,7 +24,10 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 		};
 	}, []);
 
-	const findMe = useCallback(async (map?: LeafletMap, zoom = 14): Promise<string | null> => {
+	const findMe = useCallback(async (
+		flyTo?: (position: LatLngTuple, zoom: number) => void,
+		zoom = 14,
+	): Promise<string | null> => {
 		if (!navigator.geolocation) {
 			const msg = 'Геолокация не поддерживается браузером';
 			setError(msg);
@@ -40,9 +43,6 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 		setError(null);
 
 		return new Promise<string | null>((resolve) => {
-			// On mobile, GPS cold-start returns a coarse fix first (100–300 m),
-			// then refines over a few seconds. Wait until accuracy is good enough
-			// before flying the map, so we land on the precise position.
 			const GOOD_ACCURACY_M = 50;
 			const MAX_ATTEMPTS = 5;
 			let resolved = false;
@@ -55,13 +55,12 @@ export const useUserGeolocation = (): UseGeolocationReturn => {
 				resolved = true;
 				clearTimeout(safetyTimer);
 				setLoading(false);
-				if (pos && map) {
-					map.flyTo(pos, zoom, { animate: true, duration: 1.2 });
+				if (pos && flyTo) {
+					flyTo(pos, zoom);
 				}
 				resolve(null);
 			};
 
-			// Safety net: if GPS never reaches GOOD_ACCURACY_M, fly to best available position
 			safetyTimer = setTimeout(() => doResolve(latestPos), 8000);
 
 			watchIdRef.current = navigator.geolocation.watchPosition(

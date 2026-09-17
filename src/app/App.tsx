@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../shared/lib/types';
 import { MainHeader, PathBuilder, useMapSearch, useRouteHistory, type SearchResult } from '../features/search';
 import type { RouteMode } from '../features/search';
 import { MainMap } from '../features/map';

@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
-import type { LatLngBounds } from 'leaflet';
 import { fetchBikePathsOverpass } from '../../../shared/api/overpass';
+import type { Bounds } from '../../../shared/api/overpass';
 import { bikePathsStore } from './bikePathsStore';
 import type { UseBikePathsReturn } from './types';
 import { debounce } from '../../../shared/lib/debounce';
 
-export const useBikePaths = (bounds: LatLngBounds | null, enabled: boolean): UseBikePathsReturn => {
+export const useBikePaths = (bounds: Bounds | null, enabled: boolean): UseBikePathsReturn => {
 	const paths = useSyncExternalStore(
 		bikePathsStore.subscribe,
 		bikePathsStore.getSnapshot,
 	);
 
-	const fetchPaths = useCallback(async (bbox: LatLngBounds) => {
+	const fetchPaths = useCallback(async (bbox: Bounds) => {
 		try {
 			const fetched = await fetchBikePathsOverpass(bbox);
 			bikePathsStore.addPaths(fetched);

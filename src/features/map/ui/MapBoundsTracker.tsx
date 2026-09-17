@@ -1,25 +1,37 @@
 import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
-import type { LatLngBounds } from 'leaflet';
+import { useYMap } from '../lib/ymap-context';
+import type { Bounds } from '../../../shared/api/overpass';
 
 interface MapBoundsTrackerProps {
-	onBoundsChange: (bounds: LatLngBounds) => void;
+	onBoundsChange: (bounds: Bounds) => void;
 }
 
 export const MapBoundsTracker = ({ onBoundsChange }: MapBoundsTrackerProps) => {
-	const map = useMap();
+	const map = useYMap();
 
 	useEffect(() => {
-		const updateBounds = () => onBoundsChange(map.getBounds());
+		if (!map) return;
 
-		updateBounds();
-		map.on('moveend', updateBounds);
+		const emitBounds = () => {
+			const b = map.bounds;
+			// LngLatBounds: [[west, north], [east, south]]
+			onBoundsChange({
+				west: b[0][0],
+				north: b[0][1],
+				east: b[1][0],
+				south: b[1][1],
+			});
+		};
+
+		emitBounds();
+
+		const listener = new ymaps3.YMapListener({ onActionEnd: emitBounds });
+		map.addChild(listener);
 
 		return () => {
-			map.off('moveend', updateBounds);
+			map.removeChild(listener);
 		};
 	}, [map, onBoundsChange]);
 
 	return null;
 };
-

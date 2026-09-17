@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../../../shared/lib/types';
 import type { MapStyleKey } from '../../map/model/map-styles';
 import type { SearchResult } from '../../../entities/search';
 import type { SavedRoute } from '../../map/model/useSavedRoutes';

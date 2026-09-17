@@ -9,7 +9,7 @@ import {
 	doc,
 	onSnapshot,
 } from 'firebase/firestore';
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../../../shared/lib/types';
 import { db } from '../../../shared/config/firebase';
 import type { RouteResult } from '../../../shared/api/ors';
 

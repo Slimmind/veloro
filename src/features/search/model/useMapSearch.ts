@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 export type { SearchResult } from '../../../entities/search';
 import type { SearchResult } from '../../../entities/search';
-import { searchNominatim } from '../../../shared/api/nominatim';
+import { searchYandex } from '../../../shared/api/yandex-geocoder';
 
 export interface UseMapSearchReturn {
 	results: SearchResult[];
@@ -22,7 +22,7 @@ export const useMapSearch = (): UseMapSearchReturn => {
 			setError(null);
 
 			try {
-				const parsed = await searchNominatim(query);
+				const parsed = await searchYandex(query);
 				setResults(parsed);
 			} catch (err: unknown) {
 				console.warn('Search error:', err);

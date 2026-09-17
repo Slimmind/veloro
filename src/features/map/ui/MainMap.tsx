@@ -1,46 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-	CircleMarker,
-	MapContainer,
-	Marker,
-	Polyline,
-	Popup,
-	ZoomControl,
-	useMap,
-	useMapEvents,
-} from 'react-leaflet';
-
-import L from 'leaflet';
-import type { LatLngBounds, LatLngTuple } from 'leaflet';
-import type { Map as MLMap, StyleSpecification } from 'maplibre-gl';
-
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
-import shadow from 'leaflet/dist/images/marker-shadow.png';
-
-import { BikePathsMlLayer } from './BikePathsMlLayer';
+import type { YMap, YMapDefaultFeaturesLayer, YMapEntity, YMapFeature, YMapMarker } from '@yandex/ymaps3-types';
+import { YMapContext } from '../lib/ymap-context';
+import { BikePathsLayer } from './BikePathsLayer';
 import { FindMeButton } from './FindMeButton';
 import { MapBoundsTracker } from './MapBoundsTracker';
 import { RouteLine, findClosestIndex, traveledDistance } from './RouteLine';
 import { RouteInfo } from './RouteInfo';
 import { UserLocation } from './UserLocation';
-import { VectorTileLayer } from './VectorTileLayer';
-import { BIKE_MARKER_ICON, BIKE_MARKER_ICON_SATELLITE } from '../model/map-marker';
-import { MAP_STYLES } from '../model/map-styles';
-import { removeLatinLabels } from '../model/removeLatinLabels';
-import { buildSatelliteHybridStyle } from '../model/buildSatelliteHybridStyle';
+import { createMarkerElement } from '../model/map-marker';
 import type { MapStyleKey } from '../model/map-styles';
 import type { RouteResult } from '../model/useRoute';
 import type { UseGeolocationReturn } from '../../../hooks/useUserGeolocation';
-import 'leaflet/dist/leaflet.css';
+import type { LatLngTuple } from '../../../shared/lib/types';
+import type { Bounds } from '../../../shared/api/overpass';
 import './main-map.styles.css';
-
-delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
-L.Icon.Default.mergeOptions({
-	iconUrl: icon,
-	iconRetinaUrl: iconRetina,
-	shadowUrl: shadow,
-});
 
 interface MainMapProps {
 	activeStyle: MapStyleKey;
@@ -59,28 +32,6 @@ interface MainMapProps {
 	trackPoints?: LatLngTuple[];
 }
 
-const MapInitializer = ({ findMe }: { findMe: (map?: import('leaflet').Map, zoom?: number) => Promise<string | null> }) => {
-	const map = useMap();
-	const initialized = useRef(false);
-
-	useEffect(() => {
-		if (initialized.current) return;
-		initialized.current = true;
-		findMe(map, 14);
-	}, [map, findMe]);
-
-	return null;
-};
-
-const MapClickHandler = ({ onClick }: { onClick: (latlng: LatLngTuple) => void }) => {
-	useMapEvents({
-		click(e) {
-			onClick([e.latlng.lat, e.latlng.lng]);
-		},
-	});
-	return null;
-};
-
 export const MainMap = ({
 	activeStyle,
 	geolocation,
@@ -97,35 +48,182 @@ export const MainMap = ({
 	routeName,
 	trackPoints = [],
 }: MainMapProps) => {
-	const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
-	const [mlMap, setMlMap] = useState<MLMap | null>(null);
-	const [satelliteStyle, setSatelliteStyle] = useState<StyleSpecification | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [map, setMap] = useState<YMap | null>(null);
+	const [mapBounds, setMapBounds] = useState<Bounds | null>(null);
+	const [zoom, setZoom] = useState(13);
+
+	const schemeLayerRef = useRef<YMapEntity<unknown> | null>(null);
+	const featLayerRef = useRef<YMapDefaultFeaturesLayer | null>(null);
+	const trackFeatureRef = useRef<YMapFeature | null>(null);
+	const fromMarkerRef = useRef<YMapMarker | null>(null);
+	const waypointFeaturesRef = useRef<YMapFeature[]>([]);
 
 	const { position, accuracy, findMe, loading, error } = geolocation;
-	const currentStyle = MAP_STYLES[activeStyle];
-	const markerIcon = activeStyle === 'satellite' ? BIKE_MARKER_ICON_SATELLITE : BIKE_MARKER_ICON;
+	const isSatellite = activeStyle === 'satellite';
 
+	// ─── Initialize map ───────────────────────────────────────────────────────
 	useEffect(() => {
-		setMlMap(null);
-		if (currentStyle.type === 'satellite') {
-			buildSatelliteHybridStyle(currentStyle.url).then(setSatelliteStyle);
+		if (!containerRef.current) return;
+		let ymap: YMap | null = null;
+
+		// Guard: script may fail to load (e.g. API key not authorized for this domain)
+		const win = window as Window & { ymaps3?: typeof ymaps3 };
+		if (!win.ymaps3) {
+			console.error('Yandex Maps API не загружен. Проверьте API-ключ и разрешённые домены на developer.tech.yandex.ru');
+			return;
 		}
-	}, [activeStyle]);
+
+		ymaps3.ready.then(() => {
+			if (!containerRef.current) return;
+
+			ymap = new ymaps3.YMap(containerRef.current, {
+				location: { center: [27.56, 53.9], zoom: 13 },
+			});
+
+			const scheme = new ymaps3.YMapDefaultSchemeLayer({});
+			ymap.addChild(scheme);
+			schemeLayerRef.current = scheme;
+
+			const featLayer = new ymaps3.YMapDefaultFeaturesLayer({});
+			ymap.addChild(featLayer);
+			featLayerRef.current = featLayer;
+
+			setMap(ymap);
+		});
+
+		return () => {
+			ymap?.destroy();
+			setMap(null);
+			schemeLayerRef.current = null;
+			featLayerRef.current = null;
+		};
+	}, []);
+
+	// ─── Pan to user once map is ready ────────────────────────────────────────
+	useEffect(() => {
+		if (!map) return;
+		const flyTo = (pos: LatLngTuple, z: number) =>
+			map.setLocation({ center: [pos[1], pos[0]], zoom: z, duration: 1200 });
+		findMe(flyTo, 14);
+	}, [map]); // eslint-disable-line react-hooks/exhaustive-deps
+
+	// ─── Style layer switching ─────────────────────────────────────────────────
+	useEffect(() => {
+		if (!map || !schemeLayerRef.current) return;
+
+		map.removeChild(schemeLayerRef.current);
+		// YMapDefaultSatelliteLayer exists at runtime; the types stub is incomplete
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const SatLayer = (ymaps3 as any).YMapDefaultSatelliteLayer as new (props?: object) => YMapEntity<unknown>;
+		const newLayer = isSatellite
+			? new SatLayer({})
+			: new ymaps3.YMapDefaultSchemeLayer({});
+		map.addChild(newLayer, 0);
+		schemeLayerRef.current = newLayer;
+	}, [map, isSatellite]);
+
+	// ─── Click + zoom listener ────────────────────────────────────────────────
+	useEffect(() => {
+		if (!map) return;
+
+		const clickListener = new ymaps3.YMapListener({
+			onClick: (_obj, e) => {
+				if (onMapClick && e) {
+					onMapClick([e.coordinates[1], e.coordinates[0]]);
+				}
+			},
+		});
+		const moveListener = new ymaps3.YMapListener({
+			onActionEnd: ({ location }) => {
+				setZoom(location.zoom);
+			},
+		});
+
+		map.addChild(clickListener);
+		map.addChild(moveListener);
+
+		return () => {
+			map.removeChild(clickListener);
+			map.removeChild(moveListener);
+		};
+	}, [map, onMapClick]);
+
+	// ─── Track recording polyline ─────────────────────────────────────────────
+	const displayTrack = isRecordedRoute && route ? route.coordinates : trackPoints;
 
 	useEffect(() => {
-		if (!mlMap) return;
-		removeLatinLabels(mlMap);
-	}, [mlMap]);
+		if (!map) return;
 
+		if (displayTrack.length >= 2) {
+			const geom = {
+				type: 'LineString' as const,
+				coordinates: displayTrack.map(([lat, lng]) => [lng, lat] as [number, number]),
+			};
+			if (!trackFeatureRef.current) {
+				trackFeatureRef.current = new ymaps3.YMapFeature({
+					geometry: geom,
+					style: { stroke: [{ color: '#22c55e', width: 5, opacity: 0.85 }] },
+				});
+				map.addChild(trackFeatureRef.current);
+			} else {
+				trackFeatureRef.current.update({ geometry: geom });
+			}
+		} else if (trackFeatureRef.current) {
+			map.removeChild(trackFeatureRef.current);
+			trackFeatureRef.current = null;
+		}
+	}, [map, displayTrack]);
+
+	// ─── Route-from-point marker ──────────────────────────────────────────────
+	useEffect(() => {
+		if (!map) return;
+
+		if (routeFromPoint) {
+			const coords: [number, number] = [routeFromPoint[1], routeFromPoint[0]];
+			if (!fromMarkerRef.current) {
+				fromMarkerRef.current = new ymaps3.YMapMarker(
+					{ coordinates: coords },
+					createMarkerElement(isSatellite),
+				);
+				map.addChild(fromMarkerRef.current);
+			} else {
+				fromMarkerRef.current.update({ coordinates: coords });
+			}
+		} else if (fromMarkerRef.current) {
+			map.removeChild(fromMarkerRef.current);
+			fromMarkerRef.current = null;
+		}
+	}, [map, routeFromPoint, isSatellite]);
+
+	// ─── Waypoint markers ─────────────────────────────────────────────────────
+	useEffect(() => {
+		if (!map) return;
+
+		waypointFeaturesRef.current.forEach((f) => map.removeChild(f));
+		waypointFeaturesRef.current = [];
+
+		waypoints.forEach((wp) => {
+			const f = new ymaps3.YMapFeature({
+				geometry: { type: 'Point', coordinates: [wp[1], wp[0]] },
+				style: {
+					fill: 'magenta',
+					stroke: [{ color: 'white', width: 2 }],
+					zIndex: 10,
+				},
+			});
+			map.addChild(f);
+			waypointFeaturesRef.current.push(f);
+		});
+	}, [map, waypoints]);
+
+	// ─── Traveled distance calc (for RouteInfo) ───────────────────────────────
 	const routeTraveled = route && !isRecordedRoute && position
 		? (() => {
 			const idx = findClosestIndex(route.coordinates, position);
 			return idx > 0 ? traveledDistance(route.coordinates, idx) : 0;
 		})()
 		: 0;
-
-	// For recorded tracks use the route coordinates as the display polyline
-	const displayTrackPoints = isRecordedRoute && route ? route.coordinates : trackPoints;
 
 	return (
 		<div className={`main-map ${pickingPoint ? 'main-map--picking' : ''}`}>
@@ -142,57 +240,24 @@ export const MainMap = ({
 					onClear={onClearRoute}
 				/>
 			)}
-			<MapContainer
-				center={[53.9, 27.56] as LatLngTuple}
-				zoom={13}
-				style={{ height: '100%', width: '100%' }}
-				zoomControl={false}
-				scrollWheelZoom={true}
-				doubleClickZoom={true}
-				touchZoom={true}
-				dragging={true}
-			>
-				<ZoomControl position='bottomright' />
-				<MapInitializer findMe={findMe} />
-				<FindMeButton findMe={findMe} loading={loading} error={error} />
 
-				{currentStyle.type === 'vector' ? (
-					<VectorTileLayer styleUrl={currentStyle.url} onReady={setMlMap} />
-				) : satelliteStyle ? (
-					<VectorTileLayer styleObject={satelliteStyle} onReady={setMlMap} />
-				) : null}
+			<div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 
-				{mlMap && <BikePathsMlLayer mlMap={mlMap} bounds={mapBounds} minZoom={12} isSatellite={activeStyle === 'satellite'} />}
-
-				<MapBoundsTracker onBoundsChange={setMapBounds} />
-				<UserLocation position={position} accuracy={accuracy} icon={markerIcon} />
-
-				{route && !isRecordedRoute && <RouteLine coordinates={route.coordinates} userPosition={position} />}
-
-				{displayTrackPoints.length >= 2 && (
-					<Polyline positions={displayTrackPoints} color='#22c55e' weight={5} opacity={0.85} />
-				)}
-
-				{onMapClick && <MapClickHandler onClick={onMapClick} />}
-
-				{routeFromPoint && (
-					<Marker position={routeFromPoint} icon={markerIcon}>
-						<Popup>Начало маршрута</Popup>
-					</Marker>
-				)}
-
-				{waypoints.map((wp, i) => (
-					<CircleMarker
-						key={`wp-${i}`}
-						center={wp}
-						radius={8}
-						pathOptions={{ color: 'magenta', fillColor: 'magenta', fillOpacity: 1, weight: 2 }}
-					>
-						<Popup>Точка пути {i + 1}</Popup>
-					</CircleMarker>
-				))}
-
-			</MapContainer>
+			{map && (
+				<YMapContext.Provider value={map}>
+					{route && !isRecordedRoute && (
+						<RouteLine coordinates={route.coordinates} userPosition={position} />
+					)}
+					<BikePathsLayer
+						bounds={mapBounds}
+						zoom={zoom}
+						isSatellite={isSatellite}
+					/>
+					<UserLocation position={position} accuracy={accuracy} satellite={isSatellite} />
+					<MapBoundsTracker onBoundsChange={setMapBounds} />
+					<FindMeButton findMe={findMe} loading={loading} error={error} />
+				</YMapContext.Provider>
+			)}
 		</div>
 	);
 };

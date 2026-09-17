@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../../../shared/lib/types';
 import { fetchRoute } from '../../../shared/api/ors';
 import type { RouteResult } from '../../../shared/api/ors';
 

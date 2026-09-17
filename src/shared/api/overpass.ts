@@ -1,29 +1,32 @@
-import type { LatLngBounds } from 'leaflet';
 import type { BikePath } from '../../entities/bikePath';
 import type { PathStyleKey } from '../../features/map/model/bike-path-styles';
+
+export interface Bounds {
+	north: number;
+	south: number;
+	east: number;
+	west: number;
+}
 
 type CacheEntry<T> = {
 	value: T;
 	expiresAt: number;
 };
 
-const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
-const RATE_LIMIT_TTL_MS = 30 * 1000; // 30s cooldown after 429
+const CACHE_TTL_MS = 2 * 60 * 1000;
+const RATE_LIMIT_TTL_MS = 30 * 1000;
 const cache = new Map<string, CacheEntry<BikePath[]>>();
 const inflight = new Map<string, Promise<BikePath[]>>();
 
-// Snap coordinates to a 0.1° grid (~11 km) so that small pans reuse the same cached bbox.
-// Floor south/west, ceil north/east — ensures the snapped bbox fully covers the viewport.
 const SNAP = 0.1;
 const snapFloor = (v: number) => Math.floor(v / SNAP) * SNAP;
 const snapCeil = (v: number) => Math.ceil(v / SNAP) * SNAP;
 
-// Overpass expects (S,W,N,E); Leaflet's toBBoxString() returns W,S,E,N — build manually.
-const toOverpassBbox = (bbox: LatLngBounds) => {
-	const s = snapFloor(bbox.getSouth());
-	const w = snapFloor(bbox.getWest());
-	const n = snapCeil(bbox.getNorth());
-	const e = snapCeil(bbox.getEast());
+const toOverpassBbox = (bounds: Bounds) => {
+	const s = snapFloor(bounds.south);
+	const w = snapFloor(bounds.west);
+	const n = snapCeil(bounds.north);
+	const e = snapCeil(bounds.east);
 	return `${s.toFixed(1)},${w.toFixed(1)},${n.toFixed(1)},${e.toFixed(1)}`;
 };
 
@@ -50,9 +53,9 @@ const isOverpassWay = (value: unknown): value is OverpassElementWay => {
 };
 
 export const fetchBikePathsOverpass = async (
-	bbox: LatLngBounds,
+	bounds: Bounds,
 ): Promise<BikePath[]> => {
-	const key = toCacheKey(bbox);
+	const key = toCacheKey(bounds);
 	const now = Date.now();
 
 	const cached = cache.get(key);
@@ -61,7 +64,7 @@ export const fetchBikePathsOverpass = async (
 	const pending = inflight.get(key);
 	if (pending) return pending;
 
-	const overpassBbox = toOverpassBbox(bbox);
+	const overpassBbox = toOverpassBbox(bounds);
 	const query = `
     [out:json][timeout:25];
     (
@@ -143,4 +146,3 @@ export const fetchBikePathsOverpass = async (
 	inflight.set(key, promise);
 	return promise;
 };
-

@@ -1,4 +1,4 @@
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from '../lib/types';
 
 export interface RouteResult {
 	coordinates: LatLngTuple[];

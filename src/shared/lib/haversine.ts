@@ -1,4 +1,4 @@
-import type { LatLngTuple } from 'leaflet';
+import type { LatLngTuple } from './types';
 
 export function haversine(p1: LatLngTuple, p2: LatLngTuple): number {
 	const R = 6371000;
