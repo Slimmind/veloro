@@ -9,8 +9,16 @@ type CacheEntry<T> = {
 
 const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes
 const RATE_LIMIT_TTL_MS = 30 * 1000; // 30s cooldown after 429
+const REQUEST_TIMEOUT_MS = 20_000;
 const cache = new Map<string, CacheEntry<BikePath[]>>();
 const inflight = new Map<string, Promise<BikePath[]>>();
+
+// In production (Netlify) requests go through the same-origin proxy → no CORS.
+// In local dev the proxy doesn't exist, so fall back to the public endpoint.
+const ENDPOINTS =
+	window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+		? ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']
+		: ['/api/overpass'];
 
 // Snap coordinates to a 0.1° grid (~11 km) so that small pans reuse the same cached bbox.
 // Floor south/west, ceil north/east — ensures the snapped bbox fully covers the viewport.
@@ -79,20 +87,34 @@ export const fetchBikePathsOverpass = async (
   `;
 
 	const promise = (async () => {
-		const response = await fetch('https://overpass-api.de/api/interpreter', {
-			method: 'POST',
-			body: `data=${encodeURIComponent(query)}`,
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-		});
+		let response: Response | null = null;
+		let lastError: unknown;
 
-		if (response.status === 429) {
-			cache.set(key, { value: [], expiresAt: now + RATE_LIMIT_TTL_MS });
-			throw new Error('Overpass rate limit (429)');
+		for (const endpoint of ENDPOINTS) {
+			const controller = new AbortController();
+			const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+			try {
+				response = await fetch(endpoint, {
+					method: 'POST',
+					body: new URLSearchParams({ data: query }),
+					signal: controller.signal,
+				});
+				if (response.status === 429) {
+					cache.set(key, { value: [], expiresAt: now + RATE_LIMIT_TTL_MS });
+					throw new Error('Overpass rate limit (429)');
+				}
+				if (response.ok) break;
+				lastError = new Error(`Overpass error: ${response.status}`);
+				response = null;
+			} catch (err) {
+				lastError = err;
+				response = null;
+			} finally {
+				clearTimeout(timer);
+			}
 		}
 
-		if (!response.ok) {
-			throw new Error(`Overpass error: ${response.status}`);
-		}
+		if (!response) throw lastError;
 
 		const data: unknown = await response.json();
 		const elements =
